@@ -3,7 +3,6 @@ package org.json;
 /*
 Public Domain.
 */
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Writer;
@@ -75,6 +74,7 @@ import java.lang.reflect.GenericArrayType;
  * @version 2016-08-15
  */
 public class JSONObject {
+
     /**
      * JSONObject.NULL is equivalent to the value that JavaScript calls null,
      * whilst Java's null is equivalent to the value that JavaScript calls
@@ -82,37 +82,20 @@ public class JSONObject {
      */
     private static final class Null {
 
-        /**
-         * A Null object is equal to the null value and to itself.
-         *
-         * @param object
-         *            An object to test for nullness.
-         * @return true if the object parameter is the JSONObject.NULL object or
-         *         null.
-         */
         @Override
         @SuppressWarnings("lgtm[java/unchecked-cast-in-equals]")
         public boolean equals(Object object) {
-            return object == null || object == this;
-        }
-        /**
-         * A Null object is equal to the null value and to itself.
-         *
-         * @return always returns 0.
-         */
-        @Override
-        public int hashCode() {
-            return 0;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
-        /**
-         * Get the "null" string value.
-         *
-         * @return The string "null".
-         */
+        @Override
+        public int hashCode() {
+            throw new UnsupportedOperationException("STUB: not implemented");
+        }
+
         @Override
         public String toString() {
-            return "null";
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
     }
 
@@ -127,13 +110,8 @@ public class JSONObject {
      */
     private final Map<String, Object> map;
 
-    /**
-     * Retrieves the type of the underlying Map in this class.
-     *
-     * @return The class object representing the type of the underlying Map.
-     */
     public Class<? extends Map> getMapType() {
-        return map.getClass();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -148,13 +126,7 @@ public class JSONObject {
      * Set of method names that should be excluded when identifying record-style accessors.
      * These are common bean/Object method names that are not property accessors.
      */
-    private static final Set<String> EXCLUDED_RECORD_METHOD_NAMES = Collections.unmodifiableSet(
-            new HashSet<String>(Arrays.asList(
-                    "get", "is", "set",
-                    "toString", "hashCode", "equals", "clone",
-                    "notify", "notifyAll", "wait"
-            ))
-    );
+    private static final Set<String> EXCLUDED_RECORD_METHOD_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("get", "is", "set", "toString", "hashCode", "equals", "clone", "notify", "notifyAll", "wait")));
 
     /**
      * Construct an empty JSONObject.
@@ -179,12 +151,13 @@ public class JSONObject {
      * @param names
      *            An array of strings.
      */
-    public JSONObject(JSONObject jo, String ... names) {
+    public JSONObject(JSONObject jo, String... names) {
         this(names.length);
         for (int i = 0; i < names.length; i += 1) {
             try {
                 this.putOnce(names[i], jo.opt(names[i]));
-            } catch (Exception ignore) { // exception thrown for missing key
+            } catch (Exception ignore) {
+                // exception thrown for missing key
             }
         }
     }
@@ -216,11 +189,10 @@ public class JSONObject {
     public JSONObject(JSONTokener x, JSONParserConfiguration jsonParserConfiguration) throws JSONException {
         this();
         boolean isInitial = x.getPrevious() == 0;
-
         if (x.nextClean() != '{') {
             throw x.syntaxError("A JSONObject text must begin with '{'");
         }
-        for (;;) {
+        for (; ; ) {
             if (parseJSONObject(x, jsonParserConfiguration, isInitial)) {
                 return;
             }
@@ -240,8 +212,7 @@ public class JSONObject {
         String key;
         boolean doneParsing = false;
         char c = jsonTokener.nextClean();
-
-        switch (c) {
+        switch(c) {
             case 0:
                 throw jsonTokener.syntaxError("A JSONObject text must end with '}'");
             case '}':
@@ -253,15 +224,12 @@ public class JSONObject {
                 obj = jsonTokener.nextSimpleValue(c);
                 key = obj.toString();
         }
-
         checkKeyForStrictMode(jsonTokener, jsonParserConfiguration, obj);
-
         // The key is followed by ':'.
         c = jsonTokener.nextClean();
         if (c != ':') {
             throw jsonTokener.syntaxError("Expected a ':' after a key");
         }
-
         // Use syntaxError(..) to include error location
         if (key != null) {
             // Check if key exists
@@ -269,19 +237,16 @@ public class JSONObject {
             if (keyExists && !jsonParserConfiguration.isOverwriteDuplicateKey()) {
                 throw jsonTokener.syntaxError("Duplicate key \"" + key + "\"");
             }
-
             Object value = jsonTokener.nextValue();
             // Only add value if non-null
             if (value != null) {
                 this.put(key, value);
             }
         }
-
         // Pairs are separated by ','.
         if (parseEndOfKeyValuePair(jsonTokener, jsonParserConfiguration, isInitial)) {
             doneParsing = true;
         }
-
         return doneParsing;
     }
 
@@ -293,7 +258,7 @@ public class JSONObject {
      * @return
      */
     private static boolean parseEndOfKeyValuePair(JSONTokener jsonTokener, JSONParserConfiguration jsonParserConfiguration, boolean isInitial) {
-        switch (jsonTokener.nextClean()) {
+        switch(jsonTokener.nextClean()) {
             case ';':
                 // In strict mode semicolon is not a valid separator
                 if (jsonParserConfiguration.isStrictMode()) {
@@ -335,13 +300,13 @@ public class JSONObject {
      */
     private static void checkKeyForStrictMode(JSONTokener jsonTokener, JSONParserConfiguration jsonParserConfiguration, Object obj) {
         if (jsonParserConfiguration != null && jsonParserConfiguration.isStrictMode()) {
-            if(obj instanceof Boolean) {
+            if (obj instanceof Boolean) {
                 throw jsonTokener.syntaxError(String.format("Strict mode error: key '%s' cannot be boolean", obj.toString()));
             }
-            if(obj == JSONObject.NULL) {
+            if (obj == JSONObject.NULL) {
                 throw jsonTokener.syntaxError(String.format("Strict mode error: key '%s' cannot be null", obj.toString()));
             }
-            if(obj instanceof Number) {
+            if (obj instanceof Number) {
                 throw jsonTokener.syntaxError(String.format("Strict mode error: key '%s' cannot be number", obj.toString()));
             }
         }
@@ -359,7 +324,7 @@ public class JSONObject {
      *            If a key in the map is <code>null</code>
      */
     public JSONObject(Map<?, ?> m) {
-      this(m, 0, new JSONParserConfiguration());
+        this(m, 0, new JSONParserConfiguration());
     }
 
     /**
@@ -380,16 +345,16 @@ public class JSONObject {
      */
     private JSONObject(Map<?, ?> m, int recursionDepth, JSONParserConfiguration jsonParserConfiguration) {
         if (recursionDepth > jsonParserConfiguration.getMaxNestingDepth()) {
-          throw new JSONException("JSONObject has reached recursion depth limit of " + jsonParserConfiguration.getMaxNestingDepth());
+            throw new JSONException("JSONObject has reached recursion depth limit of " + jsonParserConfiguration.getMaxNestingDepth());
         }
         if (m == null) {
             this.map = new HashMap<String, Object>();
         } else {
             this.map = new HashMap<String, Object>(m.size());
-        	for (final Entry<?, ?> e : m.entrySet()) {
-        	    if(e.getKey() == null) {
-        	        throw new NullPointerException("Null key.");
-        	    }
+            for (final Entry<?, ?> e : m.entrySet()) {
+                if (e.getKey() == null) {
+                    throw new NullPointerException("Null key.");
+                }
                 final Object value = e.getValue();
                 if (value != null || jsonParserConfiguration.isUseNativeNulls()) {
                     testValidity(value);
@@ -487,7 +452,7 @@ public class JSONObject {
      *            An array of strings, the names of the fields to be obtained
      *            from the object.
      */
-    public JSONObject(Object object, String ... names) {
+    public JSONObject(Object object, String... names) {
         this(names.length);
         Class<?> c = object.getClass();
         for (int i = 0; i < names.length; i += 1) {
@@ -546,20 +511,15 @@ public class JSONObject {
      */
     public JSONObject(String baseName, Locale locale) throws JSONException {
         this();
-        ResourceBundle bundle = ResourceBundle.getBundle(baseName, locale,
-                Thread.currentThread().getContextClassLoader());
-
-// Iterate through the keys in the bundle.
-
+        ResourceBundle bundle = ResourceBundle.getBundle(baseName, locale, Thread.currentThread().getContextClassLoader());
+        // Iterate through the keys in the bundle.
         Enumeration<String> keys = bundle.getKeys();
         while (keys.hasMoreElements()) {
             Object key = keys.nextElement();
             if (key != null) {
-
-// Go through the path, ensuring that there is a nested JSONObject for each
-// segment except the last. Add the value using the last segment's name into
-// the deepest nested JSONObject.
-
+                // Go through the path, ensuring that there is a nested JSONObject for each
+                // segment except the last. Add the value using the last segment's name into
+                // the deepest nested JSONObject.
                 String[] path = ((String) key).split("\\.");
                 int last = path.length - 1;
                 JSONObject target = this;
@@ -584,907 +544,184 @@ public class JSONObject {
      *
      * @param initialCapacity initial capacity of the internal map.
      */
-    protected JSONObject(int initialCapacity){
+    protected JSONObject(int initialCapacity) {
         this.map = new HashMap<String, Object>(initialCapacity);
     }
 
-    /**
-     * Accumulate values under a key. It is similar to the put method except
-     * that if there is already an object stored under the key then a JSONArray
-     * is stored under the key to hold all of the accumulated values. If there
-     * is already a JSONArray, then the new value is appended to it. In
-     * contrast, the put method replaces the previous value.
-     *
-     * If only one value is accumulated that is not a JSONArray, then the result
-     * will be the same as using put. But if multiple values are accumulated,
-     * then the result will be like append.
-     *
-     * @param key
-     *            A key string.
-     * @param value
-     *            An object to be accumulated under the key.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number.
-     * @throws NullPointerException
-     *            If the key is <code>null</code>.
-     */
     public JSONObject accumulate(String key, Object value) throws JSONException {
-        testValidity(value);
-        Object object = this.opt(key);
-        if (object == null) {
-            this.put(key,
-                    value instanceof JSONArray ? new JSONArray().put(value)
-                            : value);
-        } else if (object instanceof JSONArray) {
-            ((JSONArray) object).put(value);
-        } else {
-            this.put(key, new JSONArray().put(object).put(value));
-        }
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Append values to the array under a key. If the key does not exist in the
-     * JSONObject, then the key is put in the JSONObject with its value being a
-     * JSONArray containing the value parameter. If the key was already
-     * associated with a JSONArray, then the value parameter is appended to it.
-     *
-     * @param key
-     *            A key string.
-     * @param value
-     *            An object to be accumulated under the key.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number or if the current value associated with
-     *             the key is not a JSONArray.
-     * @throws NullPointerException
-     *            If the key is <code>null</code>.
-     */
     public JSONObject append(String key, Object value) throws JSONException {
-        testValidity(value);
-        Object object = this.opt(key);
-        if (object == null) {
-            this.put(key, new JSONArray().put(value));
-        } else if (object instanceof JSONArray) {
-            this.put(key, ((JSONArray) object).put(value));
-        } else {
-            throw wrongValueFormatException(key, "JSONArray", null, null);
-        }
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Produce a string from a double. The string "null" will be returned if the
-     * number is not finite.
-     *
-     * @param d
-     *            A double.
-     * @return A String.
-     */
     public static String doubleToString(double d) {
-        if (Double.isInfinite(d) || Double.isNaN(d)) {
-            return "null";
-        }
-
-        // Shave off trailing zeros and decimal point, if possible.
-        String string = Double.toString(d);
-        // idx = 0 case is covered by behavior of Double.toString()
-        if (string.indexOf('.') > 0 && string.indexOf('e') < 0
-                && string.indexOf('E') < 0) {
-            while (string.endsWith("0")) {
-                string = string.substring(0, string.length() - 1);
-            }
-            if (string.endsWith(".")) {
-                string = string.substring(0, string.length() - 1);
-            }
-        }
-        return string;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the value object associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return The object associated with the key.
-     * @throws JSONException
-     *             if the key is not found.
-     */
     public Object get(String key) throws JSONException {
-        if (key == null) {
-            throw new JSONException("Null key.");
-        }
-        Object object = this.opt(key);
-        if (object == null) {
-            throw new JSONException("JSONObject[" + quote(key) + "] not found.");
-        }
-        return object;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the enum value associated with a key.
-     *
-     * @param <E>
-     *            Enum Type
-     * @param clazz
-     *           The type of enum to retrieve.
-     * @param key
-     *           A key string.
-     * @return The enum value associated with the key
-     * @throws JSONException
-     *             if the key is not found or if the value cannot be converted
-     *             to an enum.
-     */
     public <E extends Enum<E>> E getEnum(Class<E> clazz, String key) throws JSONException {
-        E val = optEnum(clazz, key);
-        if(val==null) {
-            // JSONException should really take a throwable argument.
-            // If it did, I would re-implement this with the Enum.valueOf
-            // method and place any thrown exception in the JSONException
-            throw wrongValueFormatException(key, "enum of type " + quote(clazz.getSimpleName()), opt(key), null);
-        }
-        return val;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the boolean value associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return The truth.
-     * @throws JSONException
-     *             if the value is not a Boolean or the String "true" or
-     *             "false".
-     */
     public boolean getBoolean(String key) throws JSONException {
-        Object object = this.get(key);
-        if (Boolean.FALSE.equals(object)
-                || (object instanceof String && "false".equalsIgnoreCase((String) object))) {
-            return false;
-        } else if (Boolean.TRUE.equals(object)
-                || (object instanceof String && "true".equalsIgnoreCase((String) object))) {
-            return true;
-        }
-        throw wrongValueFormatException(key, "Boolean", object, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the BigInteger value associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return The numeric value.
-     * @throws JSONException
-     *             if the key is not found or if the value cannot
-     *             be converted to BigInteger.
-     */
     public BigInteger getBigInteger(String key) throws JSONException {
-        return this.getBigInteger(key, new JSONParserConfiguration());
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the BigInteger value associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @param jsonParserConfiguration
-     *            A configuration whose {@code maxNumberLength} bounds the number of
-     *            decimal digits in the returned integer. Values exceeding this length
-     *            are treated as unconvertible. Pass a configuration with
-     *            {@link ParserConfiguration#UNDEFINED_MAXIMUM_NUMBER_LENGTH} to disable
-     *            this check.
-     * @return The numeric value.
-     * @throws JSONException
-     *             if the key is not found or if the value cannot
-     *             be converted to BigInteger.
-     */
-    public BigInteger getBigInteger(String key, JSONParserConfiguration jsonParserConfiguration)
-            throws JSONException {
-        Object object = this.get(key);
-        BigInteger ret = objectToBigInteger(object, null, jsonParserConfiguration);
-        if (ret != null) {
-            return ret;
-        }
-        throw wrongValueFormatException(key, "BigInteger", object, null);
+    public BigInteger getBigInteger(String key, JSONParserConfiguration jsonParserConfiguration) throws JSONException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the BigDecimal value associated with a key. If the value is float or
-     * double, the {@link BigDecimal#BigDecimal(double)} constructor will
-     * be used. See notes on the constructor for conversion issues that may
-     * arise.
-     *
-     * @param key
-     *            A key string.
-     * @return The numeric value.
-     * @throws JSONException
-     *             if the key is not found or if the value
-     *             cannot be converted to BigDecimal.
-     */
     public BigDecimal getBigDecimal(String key) throws JSONException {
-        Object object = this.get(key);
-        BigDecimal ret = objectToBigDecimal(object, null);
-        if (ret != null) {
-            return ret;
-        }
-        throw wrongValueFormatException(key, "BigDecimal", object, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the double value associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return The numeric value.
-     * @throws JSONException
-     *             if the key is not found or if the value is not a Number
-     *             object and cannot be converted to a number.
-     */
     public double getDouble(String key) throws JSONException {
-        final Object object = this.get(key);
-        if(object instanceof Number) {
-            return ((Number)object).doubleValue();
-        }
-        try {
-            return Double.parseDouble(object.toString());
-        } catch (Exception e) {
-            throw wrongValueFormatException(key, "double", object, e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the float value associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return The numeric value.
-     * @throws JSONException
-     *             if the key is not found or if the value is not a Number
-     *             object and cannot be converted to a number.
-     */
     public float getFloat(String key) throws JSONException {
-        final Object object = this.get(key);
-        if(object instanceof Number) {
-            return ((Number)object).floatValue();
-        }
-        try {
-            return Float.parseFloat(object.toString());
-        } catch (Exception e) {
-            throw wrongValueFormatException(key, "float", object, e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the Number value associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return The numeric value.
-     * @throws JSONException
-     *             if the key is not found or if the value is not a Number
-     *             object and cannot be converted to a number.
-     */
     public Number getNumber(String key) throws JSONException {
-        Object object = this.get(key);
-        try {
-            if (object instanceof Number) {
-                return (Number)object;
-            }
-            return stringToNumber(object.toString());
-        } catch (Exception e) {
-            throw wrongValueFormatException(key, "number", object, e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the int value associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return The integer value.
-     * @throws JSONException
-     *             if the key is not found or if the value cannot be converted
-     *             to an integer.
-     */
     public int getInt(String key) throws JSONException {
-        final Object object = this.get(key);
-        if(object instanceof Number) {
-            return ((Number)object).intValue();
-        }
-        try {
-            return Integer.parseInt(object.toString());
-        } catch (Exception e) {
-            throw wrongValueFormatException(key, "int", object, e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the JSONArray value associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return A JSONArray which is the value.
-     * @throws JSONException
-     *             if the key is not found or if the value is not a JSONArray.
-     */
     public JSONArray getJSONArray(String key) throws JSONException {
-        Object object = this.get(key);
-        if (object instanceof JSONArray) {
-            return (JSONArray) object;
-        }
-        throw wrongValueFormatException(key, "JSONArray", object, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the JSONObject value associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return A JSONObject which is the value.
-     * @throws JSONException
-     *             if the key is not found or if the value is not a JSONObject.
-     */
     public JSONObject getJSONObject(String key) throws JSONException {
-        Object object = this.get(key);
-        if (object instanceof JSONObject) {
-            return (JSONObject) object;
-        }
-        throw wrongValueFormatException(key, "JSONObject", object, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the long value associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return The long value.
-     * @throws JSONException
-     *             if the key is not found or if the value cannot be converted
-     *             to a long.
-     */
     public long getLong(String key) throws JSONException {
-        final Object object = this.get(key);
-        if(object instanceof Number) {
-            return ((Number)object).longValue();
-        }
-        try {
-            return Long.parseLong(object.toString());
-        } catch (Exception e) {
-            throw wrongValueFormatException(key, "long", object, e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an array of field names from a JSONObject.
-     *
-     * @param jo
-     *            JSON object
-     * @return An array of field names, or null if there are no names.
-     */
     public static String[] getNames(JSONObject jo) {
-        if (jo.isEmpty()) {
-            return null;
-        }
-        return jo.keySet().toArray(new String[jo.length()]);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an array of public field names from an Object.
-     *
-     * @param object
-     *            object to read
-     * @return An array of field names, or null if there are no names.
-     */
     public static String[] getNames(Object object) {
-        if (object == null) {
-            return null;
-        }
-        Class<?> klass = object.getClass();
-        Field[] fields = klass.getFields();
-        int length = fields.length;
-        if (length == 0) {
-            return null;
-        }
-        String[] names = new String[length];
-        for (int i = 0; i < length; i += 1) {
-            names[i] = fields[i].getName();
-        }
-        return names;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the string associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return A string which is the value.
-     * @throws JSONException
-     *             if there is no string value for the key.
-     */
     public String getString(String key) throws JSONException {
-        Object object = this.get(key);
-        if (object instanceof String) {
-            return (String) object;
-        }
-        throw wrongValueFormatException(key, "string", object, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Determine if the JSONObject contains a specific key.
-     *
-     * @param key
-     *            A key string.
-     * @return true if the key exists in the JSONObject.
-     */
     public boolean has(String key) {
-        return this.map.containsKey(key);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Increment a property of a JSONObject. If there is no such property,
-     * create one with a value of 1 (Integer). If there is such a property, and if it is
-     * an Integer, Long, Double, Float, BigInteger, or BigDecimal then add one to it.
-     * No overflow bounds checking is performed, so callers should initialize the key
-     * prior to this call with an appropriate type that can handle the maximum expected
-     * value.
-     *
-     * @param key
-     *            A key string.
-     * @return this.
-     * @throws JSONException
-     *             If there is already a property with this name that is not an
-     *             Integer, Long, Double, or Float.
-     */
     public JSONObject increment(String key) throws JSONException {
-        Object value = this.opt(key);
-        if (value == null) {
-            this.put(key, 1);
-        } else if (value instanceof Integer) {
-            this.put(key, ((Integer) value).intValue() + 1);
-        } else if (value instanceof Long) {
-            this.put(key, ((Long) value).longValue() + 1L);
-        } else if (value instanceof BigInteger) {
-            this.put(key, ((BigInteger)value).add(BigInteger.ONE));
-        } else if (value instanceof Float) {
-            this.put(key, ((Float) value).floatValue() + 1.0f);
-        } else if (value instanceof Double) {
-            this.put(key, ((Double) value).doubleValue() + 1.0d);
-        } else if (value instanceof BigDecimal) {
-            this.put(key, ((BigDecimal)value).add(BigDecimal.ONE));
-        } else {
-            throw new JSONException("Unable to increment [" + quote(key) + "].");
-        }
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Determine if the value associated with the key is <code>null</code> or if there is no
-     * value.
-     *
-     * @param key
-     *            A key string.
-     * @return true if there is no value associated with the key or if the value
-     *        is the JSONObject.NULL object.
-     */
     public boolean isNull(String key) {
-        return JSONObject.NULL.equals(this.opt(key));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an enumeration of the keys of the JSONObject. Modifying this key Set will also
-     * modify the JSONObject. Use with caution.
-     *
-     * @see Set#iterator()
-     *
-     * @return An iterator of the keys.
-     */
     public Iterator<String> keys() {
-        return this.keySet().iterator();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get a set of keys of the JSONObject. Modifying this key Set will also modify the
-     * JSONObject. Use with caution.
-     *
-     * @see Map#keySet()
-     *
-     * @return A keySet.
-     */
     public Set<String> keySet() {
-        return this.map.keySet();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get a set of entries of the JSONObject. These are raw values and may not
-     * match what is returned by the JSONObject get* and opt* functions. Modifying
-     * the returned EntrySet or the Entry objects contained therein will modify the
-     * backing JSONObject. This does not return a clone or a read-only view.
-     *
-     * Use with caution.
-     *
-     * @see Map#entrySet()
-     *
-     * @return An Entry Set
-     */
     protected Set<Entry<String, Object>> entrySet() {
-        return this.map.entrySet();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the number of keys stored in the JSONObject.
-     *
-     * @return The number of keys in the JSONObject.
-     */
     public int length() {
-        return this.map.size();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Removes all of the elements from this JSONObject.
-     * The JSONObject will be empty after this call returns.
-     */
     public void clear() {
-        this.map.clear();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Check if JSONObject is empty.
-     *
-     * @return true if JSONObject is empty, otherwise false.
-     */
     public boolean isEmpty() {
-        return this.map.isEmpty();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Produce a JSONArray containing the names of the elements of this
-     * JSONObject.
-     *
-     * @return A JSONArray containing the key strings, or null if the JSONObject
-     *        is empty.
-     */
     public JSONArray names() {
-    	if(this.map.isEmpty()) {
-    		return null;
-    	}
-        return new JSONArray(this.map.keySet());
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Produce a string from a Number.
-     *
-     * @param number
-     *            A Number
-     * @return A String.
-     * @throws JSONException
-     *             If n is a non-finite number.
-     */
     public static String numberToString(Number number) throws JSONException {
-        if (number == null) {
-            throw new JSONException("Null pointer");
-        }
-        testValidity(number);
-
-        // Shave off trailing zeros and decimal point, if possible.
-        String string = number.toString();
-        // idx = 0 case is covered by behavior of .toString()
-        if (string.indexOf('.') > 0 && string.indexOf('e') < 0
-                && string.indexOf('E') < 0) {
-            while (string.endsWith("0")) {
-                string = string.substring(0, string.length() - 1);
-            }
-            if (string.endsWith(".")) {
-                string = string.substring(0, string.length() - 1);
-            }
-        }
-        return string;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional value associated with a key.
-     *
-     * @param key
-     *            A key string.
-     * @return An object which is the value, or null if there is no value.
-     */
     public Object opt(String key) {
-        return key == null ? null : this.map.get(key);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the enum value associated with a key.
-     *
-     * @param <E>
-     *            Enum Type
-     * @param clazz
-     *            The type of enum to retrieve.
-     * @param key
-     *            A key string.
-     * @return The enum value associated with the key or null if not found
-     */
     public <E extends Enum<E>> E optEnum(Class<E> clazz, String key) {
-        return this.optEnum(clazz, key, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the enum value associated with a key.
-     *
-     * @param <E>
-     *            Enum Type
-     * @param clazz
-     *            The type of enum to retrieve.
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default in case the value is not found
-     * @return The enum value associated with the key or defaultValue
-     *            if the value is not found or cannot be assigned to <code>clazz</code>
-     */
     public <E extends Enum<E>> E optEnum(Class<E> clazz, String key, E defaultValue) {
-        try {
-            Object val = this.opt(key);
-            if (NULL.equals(val)) {
-                return defaultValue;
-            }
-            if (clazz.isAssignableFrom(val.getClass())) {
-                // we just checked it!
-                @SuppressWarnings("unchecked")
-                E myE = (E) val;
-                return myE;
-            }
-            return Enum.valueOf(clazz, val.toString());
-        } catch (IllegalArgumentException e) {
-            return defaultValue;
-        } catch (NullPointerException e) {
-            return defaultValue;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional boolean associated with a key. It returns false if there
-     * is no such key, or if the value is not Boolean.TRUE or the String "true".
-     *
-     * @param key
-     *            A key string.
-     * @return The truth.
-     */
     public boolean optBoolean(String key) {
-        return this.optBoolean(key, false);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional boolean associated with a key. It returns the
-     * defaultValue if there is no such key, or if it is not a Boolean or the
-     * String "true" or "false" (case insensitive).
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return The truth.
-     */
     public boolean optBoolean(String key, boolean defaultValue) {
-        Object val = this.opt(key);
-        if (NULL.equals(val)) {
-            return defaultValue;
-        }
-        if (val instanceof Boolean){
-            return ((Boolean) val).booleanValue();
-        }
-        try {
-            // we'll use the get anyway because it does string conversion.
-            return this.getBoolean(key);
-        } catch (Exception e) {
-            return defaultValue;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional boolean object associated with a key. It returns false if there
-     * is no such key, or if the value is not Boolean.TRUE or the String "true".
-     *
-     * @param key
-     *            A key string.
-     * @return The truth.
-     */
     public Boolean optBooleanObject(String key) {
-        return this.optBooleanObject(key, false);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional boolean object associated with a key. It returns the
-     * defaultValue if there is no such key, or if it is not a Boolean or the
-     * String "true" or "false" (case insensitive).
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return The truth.
-     */
     public Boolean optBooleanObject(String key, Boolean defaultValue) {
-        Object val = this.opt(key);
-        if (NULL.equals(val)) {
-            return defaultValue;
-        }
-        if (val instanceof Boolean){
-            return ((Boolean) val).booleanValue();
-        }
-        try {
-            // we'll use the get anyway because it does string conversion.
-            return this.getBoolean(key);
-        } catch (Exception e) {
-            return defaultValue;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional BigDecimal associated with a key, or the defaultValue if
-     * there is no such key or if its value is not a number. If the value is a
-     * string, an attempt will be made to evaluate it as a number. If the value
-     * is float or double, then the {@link BigDecimal#BigDecimal(double)}
-     * constructor will be used. See notes on the constructor for conversion
-     * issues that may arise.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return An object which is the value.
-     */
     public BigDecimal optBigDecimal(String key, BigDecimal defaultValue) {
-        Object val = this.opt(key);
-        return objectToBigDecimal(val, defaultValue);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * @param val value to convert
-     * @param defaultValue default value to return is the conversion doesn't work or is null.
-     * @return BigDecimal conversion of the original value, or the defaultValue if unable
-     *          to convert.
-     */
     static BigDecimal objectToBigDecimal(Object val, BigDecimal defaultValue) {
-        return objectToBigDecimal(val, defaultValue, true);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * @param val value to convert
-     * @param defaultValue default value to return is the conversion doesn't work or is null.
-     * @param exact When <code>true</code>, then {@link Double} and {@link Float} values will be converted exactly.
-     *      When <code>false</code>, they will be converted to {@link String} values before converting to {@link BigDecimal}.
-     * @return BigDecimal conversion of the original value, or the defaultValue if unable
-     *          to convert.
-     */
     static BigDecimal objectToBigDecimal(Object val, BigDecimal defaultValue, boolean exact) {
-        if (NULL.equals(val)) {
-            return defaultValue;
-        }
-        if (val instanceof BigDecimal){
-            return (BigDecimal) val;
-        }
-        if (val instanceof BigInteger){
-            return new BigDecimal((BigInteger) val);
-        }
-        if (val instanceof Double || val instanceof Float){
-            if (!numberIsFinite((Number)val)) {
-                return defaultValue;
-            }
-            if (exact) {
-                return new BigDecimal(((Number)val).doubleValue());
-            }
-            // use the string constructor so that we maintain "nice" values for doubles and floats
-            // the double constructor will translate doubles to "exact" values instead of the likely
-            // intended representation
-            return new BigDecimal(val.toString());
-        }
-        if (val instanceof Long || val instanceof Integer
-                || val instanceof Short || val instanceof Byte){
-            return new BigDecimal(((Number) val).longValue());
-        }
-        // don't check if it's a string in case of unchecked Number subclasses
-        try {
-            return new BigDecimal(val.toString());
-        } catch (Exception e) {
-            return defaultValue;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional BigInteger associated with a key, or the defaultValue if
-     * there is no such key or if its value is not a number. If the value is a
-     * string, an attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return An object which is the value.
-     */
     public BigInteger optBigInteger(String key, BigInteger defaultValue) {
-        return this.optBigInteger(key, defaultValue, new JSONParserConfiguration());
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional BigInteger associated with a key, or the defaultValue if
-     * there is no such key or if its value is not a number. If the value is a
-     * string, an attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @param jsonParserConfiguration
-     *            A configuration whose {@code maxNumberLength} bounds the number of
-     *            decimal digits in the returned integer. Values exceeding this length
-     *            are treated as unconvertible and {@code defaultValue} is returned.
-     *            Pass a configuration with
-     *            {@link ParserConfiguration#UNDEFINED_MAXIMUM_NUMBER_LENGTH} to disable
-     *            this check.
-     * @return An object which is the value.
-     */
-    public BigInteger optBigInteger(String key, BigInteger defaultValue,
-            JSONParserConfiguration jsonParserConfiguration) {
-        Object val = this.opt(key);
-        return objectToBigInteger(val, defaultValue, jsonParserConfiguration);
+    public BigInteger optBigInteger(String key, BigInteger defaultValue, JSONParserConfiguration jsonParserConfiguration) {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * @param val value to convert
-     * @param defaultValue default value to return is the conversion doesn't work or is null.
-     * @return BigInteger conversion of the original value, or the defaultValue if unable
-     *          to convert.
-     */
     static BigInteger objectToBigInteger(Object val, BigInteger defaultValue) {
-        return objectToBigInteger(val, defaultValue, new JSONParserConfiguration());
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * @param val value to convert
-     * @param defaultValue default value to return is the conversion doesn't work or is null.
-     * @param jsonParserConfiguration parser configuration whose {@code maxNumberLength}
-     *            bounds the number of decimal digits in the resulting integer. Values whose
-     *            integer part would exceed this length are treated as unconvertible and
-     *            {@code defaultValue} is returned. Pass a configuration with
-     *            {@link ParserConfiguration#UNDEFINED_MAXIMUM_NUMBER_LENGTH} to disable this check.
-     * @return BigInteger conversion of the original value, or the defaultValue if unable
-     *          to convert.
-     */
-    static BigInteger objectToBigInteger(Object val, BigInteger defaultValue,
-            JSONParserConfiguration jsonParserConfiguration) {
-        if (NULL.equals(val)) {
-            return defaultValue;
-        }
-        if (jsonParserConfiguration == null) {
-            jsonParserConfiguration = new JSONParserConfiguration();
-        }
-        final int maxNumberLength = jsonParserConfiguration.getMaxNumberLength();
-        if (val instanceof BigInteger){
-            return (BigInteger) val;
-        }
-        if (val instanceof BigDecimal){
-            BigDecimal bd = (BigDecimal) val;
-            // Same ceiling as the parse-time maxNumberLength guard: refuse to
-            // materialise an integer whose decimal representation would exceed
-            // maxNumberLength digits. Prevents DoS via short exponent literals
-            // like 1e100000000 (CVE-2026-59171, see issue #1063).
-            if (maxNumberLength != ParserConfiguration.UNDEFINED_MAXIMUM_NUMBER_LENGTH
-                    && (long) bd.precision() - bd.scale() > maxNumberLength) {
-                return defaultValue;
-            }
-            return bd.toBigInteger();
-        }
-        if (val instanceof Double || val instanceof Float){
-            if (!numberIsFinite((Number)val)) {
-                return defaultValue;
-            }
-            return BigDecimal.valueOf(((Number) val).doubleValue()).toBigInteger();
-        }
-        if (val instanceof Long || val instanceof Integer
-                || val instanceof Short || val instanceof Byte){
-            return BigInteger.valueOf(((Number) val).longValue());
-        }
-        return attemptConversionToBigInteger(val, defaultValue, maxNumberLength);
+    static BigInteger objectToBigInteger(Object val, BigInteger defaultValue, JSONParserConfiguration jsonParserConfiguration) {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -1506,10 +743,9 @@ public class JSONObject {
              * that type cast support that may truncate the decimal.
              */
             final String valStr = val.toString();
-            if(isDecimalNotation(valStr)) {
+            if (isDecimalNotation(valStr)) {
                 BigDecimal bd = new BigDecimal(valStr);
-                if (maxNumberLength != ParserConfiguration.UNDEFINED_MAXIMUM_NUMBER_LENGTH
-                        && (long) bd.precision() - bd.scale() > maxNumberLength) {
+                if (maxNumberLength != ParserConfiguration.UNDEFINED_MAXIMUM_NUMBER_LENGTH && (long) bd.precision() - bd.scale() > maxNumberLength) {
                     return defaultValue;
                 }
                 return bd.toBigInteger();
@@ -1520,384 +756,100 @@ public class JSONObject {
         }
     }
 
-    /**
-     * Get an optional double associated with a key, or NaN if there is no such
-     * key or if its value is not a number. If the value is a string, an attempt
-     * will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A string which is the key.
-     * @return An object which is the value.
-     */
     public double optDouble(String key) {
-        return this.optDouble(key, Double.NaN);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional double associated with a key, or the defaultValue if
-     * there is no such key or if its value is not a number. If the value is a
-     * string, an attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return An object which is the value.
-     */
     public double optDouble(String key, double defaultValue) {
-        Number val = this.optNumber(key);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.doubleValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional Double object associated with a key, or NaN if there is no such
-     * key or if its value is not a number. If the value is a string, an attempt
-     * will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A string which is the key.
-     * @return An object which is the value.
-     */
     public Double optDoubleObject(String key) {
-        return this.optDoubleObject(key, Double.NaN);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional Double object associated with a key, or the defaultValue if
-     * there is no such key or if its value is not a number. If the value is a
-     * string, an attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return An object which is the value.
-     */
     public Double optDoubleObject(String key, Double defaultValue) {
-        Number val = this.optNumber(key);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.doubleValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional float value associated with an index. NaN is returned
-     * if there is no value for the index, or if the value is not a number and
-     * cannot be converted to a number.
-     *
-     * @param key
-     *            A key string.
-     * @return The value.
-     */
     public float optFloat(String key) {
-        return this.optFloat(key, Float.NaN);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional float value associated with an index. The defaultValue
-     * is returned if there is no value for the index, or if the value is not a
-     * number and cannot be converted to a number.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default value.
-     * @return The value.
-     */
     public float optFloat(String key, float defaultValue) {
-        Number val = this.optNumber(key);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.floatValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional Float object associated with an index. NaN is returned
-     * if there is no value for the index, or if the value is not a number and
-     * cannot be converted to a number.
-     *
-     * @param key
-     *            A key string.
-     * @return The object.
-     */
     public Float optFloatObject(String key) {
-        return this.optFloatObject(key, Float.NaN);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional Float object associated with an index. The defaultValue
-     * is returned if there is no value for the index, or if the value is not a
-     * number and cannot be converted to a number.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default object.
-     * @return The object.
-     */
     public Float optFloatObject(String key, Float defaultValue) {
-        Number val = this.optNumber(key);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.floatValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional int value associated with a key, or zero if there is no
-     * such key or if the value is not a number. If the value is a string, an
-     * attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @return An object which is the value.
-     */
     public int optInt(String key) {
-        return this.optInt(key, 0);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional int value associated with a key, or the default if there
-     * is no such key or if the value is not a number. If the value is a string,
-     * an attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return An object which is the value.
-     */
     public int optInt(String key, int defaultValue) {
-        final Number val = this.optNumber(key, null);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.intValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional Integer object associated with a key, or zero if there is no
-     * such key or if the value is not a number. If the value is a string, an
-     * attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @return An object which is the value.
-     */
     public Integer optIntegerObject(String key) {
-        return this.optIntegerObject(key, 0);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional Integer object associated with a key, or the default if there
-     * is no such key or if the value is not a number. If the value is a string,
-     * an attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return An object which is the value.
-     */
     public Integer optIntegerObject(String key, Integer defaultValue) {
-        final Number val = this.optNumber(key, null);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.intValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional JSONArray associated with a key. It returns null if there
-     * is no such key, or if its value is not a JSONArray.
-     *
-     * @param key
-     *            A key string.
-     * @return A JSONArray which is the value.
-     */
     public JSONArray optJSONArray(String key) {
-        return this.optJSONArray(key, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional JSONArray associated with a key, or the default if there
-     * is no such key, or if its value is not a JSONArray.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return A JSONArray which is the value.
-     */
     public JSONArray optJSONArray(String key, JSONArray defaultValue) {
-        Object object = this.opt(key);
-        return object instanceof JSONArray ? (JSONArray) object : defaultValue;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional JSONObject associated with a key. It returns null if
-     * there is no such key, or if its value is not a JSONObject.
-     *
-     * @param key
-     *            A key string.
-     * @return A JSONObject which is the value.
-     */
-    public JSONObject optJSONObject(String key) { return this.optJSONObject(key, null); }
+    public JSONObject optJSONObject(String key) {
+        throw new UnsupportedOperationException("STUB: not implemented");
+    }
 
-    /**
-     * Get an optional JSONObject associated with a key, or the default if there
-     * is no such key or if the value is not a JSONObject.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return An JSONObject which is the value.
-     */
     public JSONObject optJSONObject(String key, JSONObject defaultValue) {
-        Object object = this.opt(key);
-        return object instanceof JSONObject ? (JSONObject) object : defaultValue;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional long value associated with a key, or zero if there is no
-     * such key or if the value is not a number. If the value is a string, an
-     * attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @return An object which is the value.
-     */
     public long optLong(String key) {
-        return this.optLong(key, 0);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional long value associated with a key, or the default if there
-     * is no such key or if the value is not a number. If the value is a string,
-     * an attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return An object which is the value.
-     */
     public long optLong(String key, long defaultValue) {
-        final Number val = this.optNumber(key, null);
-        if (val == null) {
-            return defaultValue;
-        }
-
-        return val.longValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional Long object associated with a key, or zero if there is no
-     * such key or if the value is not a number. If the value is a string, an
-     * attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @return An object which is the value.
-     */
     public Long optLongObject(String key) {
-        return this.optLongObject(key, 0L);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional Long object associated with a key, or the default if there
-     * is no such key or if the value is not a number. If the value is a string,
-     * an attempt will be made to evaluate it as a number.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return An object which is the value.
-     */
     public Long optLongObject(String key, Long defaultValue) {
-        final Number val = this.optNumber(key, null);
-        if (val == null) {
-            return defaultValue;
-        }
-
-        return val.longValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional {@link Number} value associated with a key, or <code>null</code>
-     * if there is no such key or if the value is not a number. If the value is a string,
-     * an attempt will be made to evaluate it as a number ({@link BigDecimal}). This method
-     * would be used in cases where type coercion of the number value is unwanted.
-     *
-     * @param key
-     *            A key string.
-     * @return An object which is the value.
-     */
     public Number optNumber(String key) {
-        return this.optNumber(key, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional {@link Number} value associated with a key, or the default if there
-     * is no such key or if the value is not a number. If the value is a string,
-     * an attempt will be made to evaluate it as a number. This method
-     * would be used in cases where type coercion of the number value is unwanted.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return An object which is the value.
-     */
     public Number optNumber(String key, Number defaultValue) {
-        Object val = this.opt(key);
-        if (NULL.equals(val)) {
-            return defaultValue;
-        }
-        if (val instanceof Number){
-            return (Number) val;
-        }
-
-        try {
-            return stringToNumber(val.toString());
-        } catch (Exception e) {
-            return defaultValue;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional string associated with a key. It returns an empty string
-     * if there is no such key. If the value is not a string and is not null,
-     * then it is converted to a string.
-     *
-     * @param key
-     *            A key string.
-     * @return A string which is the value.
-     */
     public String optString(String key) {
-        return this.optString(key, "");
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional string associated with a key. It returns the defaultValue
-     * if there is no such key.
-     *
-     * @param key
-     *            A key string.
-     * @param defaultValue
-     *            The default.
-     * @return A string which is the value.
-     */
     public String optString(String key, String defaultValue) {
-        Object object = this.opt(key);
-        return NULL.equals(object) ? defaultValue : object.toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -1923,12 +875,9 @@ public class JSONObject {
      */
     private void populateMap(Object bean, Set<Object> objectsRecord, JSONParserConfiguration jsonParserConfiguration) {
         Class<?> klass = bean.getClass();
-
         // If klass is a System class then set includeSuperClass to false.
-        
         // Check if this is a Java record type
         boolean isRecord = isRecordType(klass);
-
         Method[] methods = getMethods(klass);
         for (final Method method : methods) {
             if (isValidMethod(method)) {
@@ -1948,8 +897,7 @@ public class JSONObject {
      * @param method method being processed
      * @param key name of the method
      */
-    private void processMethod(Object bean, Set<Object> objectsRecord, JSONParserConfiguration jsonParserConfiguration,
-                               Method method, String key) {
+    private void processMethod(Object bean, Set<Object> objectsRecord, JSONParserConfiguration jsonParserConfiguration, Method method, String key) {
         try {
             final Object result = method.invoke(bean);
             if (result != null || jsonParserConfiguration.isUseNativeNulls()) {
@@ -1959,14 +907,10 @@ public class JSONObject {
                 if (objectsRecord.contains(result)) {
                     throw recursivelyDefinedObjectException(key);
                 }
-
                 objectsRecord.add(result);
-
                 testValidity(result);
                 this.map.put(key, wrap(result, objectsRecord));
-
                 objectsRecord.remove(result);
-
                 closeClosable(result);
             }
         } catch (IllegalAccessException ignore) {
@@ -1982,7 +926,7 @@ public class JSONObject {
      * Checks if a class is a Java record type.
      * This uses reflection to check for the isRecord() method which was introduced in Java 16.
      * This approach works even when running on Java 6+ JVM.
-     * 
+     *
      * @param klass the class to check
      * @return true if the class is a record type, false otherwise
      */
@@ -2008,13 +952,11 @@ public class JSONObject {
      */
     private static Method[] getMethods(Class<?> klass) {
         boolean includeSuperClass = klass.getClassLoader() != null;
-
         return includeSuperClass ? klass.getMethods() : klass.getDeclaredMethods();
     }
 
     private static boolean isValidMethodName(String name) {
-        return !"getClass".equals(name) 
-                && !"getDeclaringClass".equals(name);
+        return !"getClass".equals(name) && !"getDeclaringClass".equals(name);
     }
 
     private static String getKeyNameFromMethod(Method method, boolean isRecordType) {
@@ -2062,7 +1004,7 @@ public class JSONObject {
     /**
      * Checks if a method is a record-style accessor.
      * Record accessors have lowercase names without get/is prefixes and are not inherited from standard Java classes.
-     * 
+     *
      * @param methodName the name of the method
      * @param method the method to check
      * @return true if this is a record-style accessor, false otherwise
@@ -2071,21 +1013,17 @@ public class JSONObject {
         if (methodName.isEmpty() || !Character.isLowerCase(methodName.charAt(0))) {
             return false;
         }
-        
         // Exclude common bean/Object method names
         if (EXCLUDED_RECORD_METHOD_NAMES.contains(methodName)) {
             return false;
         }
-        
         Class<?> declaringClass = method.getDeclaringClass();
         if (declaringClass == null || declaringClass == Object.class) {
             return false;
         }
-        
         if (Enum.class.isAssignableFrom(declaringClass) || Number.class.isAssignableFrom(declaringClass)) {
             return false;
         }
-        
         String className = declaringClass.getName();
         return !className.startsWith("java.") && !className.startsWith("javax.");
     }
@@ -2106,12 +1044,7 @@ public class JSONObject {
      */
     private static boolean isValidMethod(Method method) {
         final int modifiers = method.getModifiers();
-        return Modifier.isPublic(modifiers)
-                && !Modifier.isStatic(modifiers)
-                && method.getParameterTypes().length == 0
-                && !method.isBridge()
-                && method.getReturnType() != Void.TYPE
-                && isValidMethodName(method.getName());
+        return Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers) && method.getParameterTypes().length == 0 && !method.isBridge() && method.getReturnType() != Void.TYPE && isValidMethodName(method.getName());
     }
 
     /**
@@ -2150,17 +1083,14 @@ public class JSONObject {
         if (m == null || annotationClass == null) {
             return null;
         }
-
         if (m.isAnnotationPresent(annotationClass)) {
             return m.getAnnotation(annotationClass);
         }
-
         // If we've already reached the Object class, return null;
         Class<?> c = m.getDeclaringClass();
         if (c.getSuperclass() == null) {
             return null;
         }
-
         // check directly implemented interfaces for the method being checked
         for (Class<?> i : c.getInterfaces()) {
             try {
@@ -2172,15 +1102,11 @@ public class JSONObject {
                 // ignore this excpetion
             }
         }
-
         // If the superclass is Object, no annotations will be found any more
         if (Object.class.equals(c.getSuperclass()))
             return null;
-
         try {
-            return getAnnotation(
-                    c.getSuperclass().getMethod(m.getName(), m.getParameterTypes()),
-                    annotationClass);
+            return getAnnotation(c.getSuperclass().getMethod(m.getName(), m.getParameterTypes()), annotationClass);
         } catch (final SecurityException ex) {
             return null;
         } catch (final NoSuchMethodException ex) {
@@ -2204,17 +1130,14 @@ public class JSONObject {
         if (m == null || annotationClass == null) {
             return -1;
         }
-
         if (m.isAnnotationPresent(annotationClass)) {
             return 1;
         }
-
         // we've already reached the Object class
         Class<?> c = m.getDeclaringClass();
         if (c.getSuperclass() == null) {
             return -1;
         }
-
         // check directly implemented interfaces for the method being checked
         for (Class<?> i : c.getInterfaces()) {
             try {
@@ -2230,15 +1153,11 @@ public class JSONObject {
                 // Nothing to do here
             }
         }
-
         //If the superclass is Object, no annotations will be found any more
         if (Object.class.equals(c.getSuperclass()))
             return -1;
-
         try {
-            int d = getAnnotationDepth(
-                    c.getSuperclass().getMethod(m.getName(), m.getParameterTypes()),
-                    annotationClass);
+            int d = getAnnotationDepth(c.getSuperclass().getMethod(m.getName(), m.getParameterTypes()), annotationClass);
             if (d > 0) {
                 // since the annotation was on the superclass, add 1
                 return d + 1;
@@ -2251,354 +1170,69 @@ public class JSONObject {
         }
     }
 
-    /**
-     * Put a key/boolean pair in the JSONObject.
-     *
-     * @param key
-     *            A key string.
-     * @param value
-     *            A boolean which is the value.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number.
-     * @throws NullPointerException
-     *            If the key is <code>null</code>.
-     */
     public JSONObject put(String key, boolean value) throws JSONException {
-        return this.put(key, value ? Boolean.TRUE : Boolean.FALSE);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a key/value pair in the JSONObject, where the value will be a
-     * JSONArray which is produced from a Collection.
-     *
-     * @param key
-     *            A key string.
-     * @param value
-     *            A Collection value.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number.
-     * @throws NullPointerException
-     *            If the key is <code>null</code>.
-     */
     public JSONObject put(String key, Collection<?> value) throws JSONException {
-        return this.put(key, new JSONArray(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a key/double pair in the JSONObject.
-     *
-     * @param key
-     *            A key string.
-     * @param value
-     *            A double which is the value.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number.
-     * @throws NullPointerException
-     *            If the key is <code>null</code>.
-     */
     public JSONObject put(String key, double value) throws JSONException {
-        return this.put(key, Double.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a key/float pair in the JSONObject.
-     *
-     * @param key
-     *            A key string.
-     * @param value
-     *            A float which is the value.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number.
-     * @throws NullPointerException
-     *            If the key is <code>null</code>.
-     */
     public JSONObject put(String key, float value) throws JSONException {
-        return this.put(key, Float.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a key/int pair in the JSONObject.
-     *
-     * @param key
-     *            A key string.
-     * @param value
-     *            An int which is the value.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number.
-     * @throws NullPointerException
-     *            If the key is <code>null</code>.
-     */
     public JSONObject put(String key, int value) throws JSONException {
-        return this.put(key, Integer.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a key/long pair in the JSONObject.
-     *
-     * @param key
-     *            A key string.
-     * @param value
-     *            A long which is the value.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number.
-     * @throws NullPointerException
-     *            If the key is <code>null</code>.
-     */
     public JSONObject put(String key, long value) throws JSONException {
-        return this.put(key, Long.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a key/value pair in the JSONObject, where the value will be a
-     * JSONObject which is produced from a Map.
-     *
-     * @param key
-     *            A key string.
-     * @param value
-     *            A Map value.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number.
-     * @throws NullPointerException
-     *            If the key is <code>null</code>.
-     */
     public JSONObject put(String key, Map<?, ?> value) throws JSONException {
-        return this.put(key, new JSONObject(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a key/value pair in the JSONObject. If the value is <code>null</code>, then the
-     * key will be removed from the JSONObject if it is present.
-     *
-     * @param key
-     *            A key string.
-     * @param value
-     *            An object which is the value. It should be of one of these
-     *            types: Boolean, Double, Integer, JSONArray, JSONObject, Long,
-     *            String, or the JSONObject.NULL object.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number.
-     * @throws NullPointerException
-     *            If the key is <code>null</code>.
-     */
     public JSONObject put(String key, Object value) throws JSONException {
-        if (key == null) {
-            throw new NullPointerException("Null key.");
-        }
-        if (value != null) {
-            testValidity(value);
-            this.map.put(key, value);
-        } else {
-            this.remove(key);
-        }
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a key/value pair in the JSONObject, but only if the key and the value
-     * are both non-null, and only if there is not already a member with that
-     * name.
-     *
-     * @param key
-     *            key to insert into
-     * @param value
-     *            value to insert
-     * @return this.
-     * @throws JSONException
-     *             if the key is a duplicate
-     */
     public JSONObject putOnce(String key, Object value) throws JSONException {
-        if (key != null && value != null) {
-            if (this.opt(key) != null) {
-                throw new JSONException("Duplicate key \"" + key + "\"");
-            }
-            return this.put(key, value);
-        }
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a key/value pair in the JSONObject, but only if the key and the value
-     * are both non-null.
-     *
-     * @param key
-     *            A key string.
-     * @param value
-     *            An object which is the value. It should be of one of these
-     *            types: Boolean, Double, Integer, JSONArray, JSONObject, Long,
-     *            String, or the JSONObject.NULL object.
-     * @return this.
-     * @throws JSONException
-     *             If the value is a non-finite number.
-     */
     public JSONObject putOpt(String key, Object value) throws JSONException {
-        if (key != null && value != null) {
-            return this.put(key, value);
-        }
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Creates a JSONPointer using an initialization string and tries to
-     * match it to an item within this JSONObject. For example, given a
-     * JSONObject initialized with this document:
-     * <pre>
-     * {
-     *     "a":{"b":"c"}
-     * }
-     * </pre>
-     * and this JSONPointer string:
-     * <pre>
-     * "/a/b"
-     * </pre>
-     * Then this method will return the String "c".
-     * A JSONPointerException may be thrown from code called by this method.
-     *
-     * @param jsonPointer string that can be used to create a JSONPointer
-     * @return the item matched by the JSONPointer, otherwise null
-     */
     public Object query(String jsonPointer) {
-        return query(new JSONPointer(jsonPointer));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-    /**
-     * Uses a user initialized JSONPointer  and tries to
-     * match it to an item within this JSONObject. For example, given a
-     * JSONObject initialized with this document:
-     * <pre>
-     * {
-     *     "a":{"b":"c"}
-     * }
-     * </pre>
-     * and this JSONPointer:
-     * <pre>
-     * "/a/b"
-     * </pre>
-     * Then this method will return the String "c".
-     * A JSONPointerException may be thrown from code called by this method.
-     *
-     * @param jsonPointer string that can be used to create a JSONPointer
-     * @return the item matched by the JSONPointer, otherwise null
-     */
+
     public Object query(JSONPointer jsonPointer) {
-        return jsonPointer.queryFrom(this);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Queries and returns a value from this object using {@code jsonPointer}, or
-     * returns null if the query fails due to a missing key.
-     *
-     * @param jsonPointer the string representation of the JSON pointer
-     * @return the queried value or {@code null}
-     * @throws IllegalArgumentException if {@code jsonPointer} has invalid syntax
-     */
     public Object optQuery(String jsonPointer) {
-    	return optQuery(new JSONPointer(jsonPointer));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Queries and returns a value from this object using {@code jsonPointer}, or
-     * returns null if the query fails due to a missing key.
-     *
-     * @param jsonPointer The JSON pointer
-     * @return the queried value or {@code null}
-     * @throws IllegalArgumentException if {@code jsonPointer} has invalid syntax
-     */
     public Object optQuery(JSONPointer jsonPointer) {
-        try {
-            return jsonPointer.queryFrom(this);
-        } catch (JSONPointerException e) {
-            return null;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Produce a string in double quotes with backslash sequences in all the
-     * right places. A backslash will be inserted within &lt;/, producing
-     * &lt;\/, allowing JSON text to be delivered in HTML. In JSON text, a
-     * string cannot contain a control character or an unescaped quote or
-     * backslash.
-     *
-     * @param string
-     *            A String
-     * @return A String correctly formatted for insertion in a JSON text.
-     */
     @SuppressWarnings("resource")
     public static String quote(String string) {
-        if (string == null || string.isEmpty()) {
-            return "\"\"";
-        }
-        Writer sw = new StringBuilderWriter(string.length() + 2);
-        try {
-            return quote(string, sw).toString();
-        } catch (IOException ignored) {
-            // will never happen - we are writing to a string writer
-            return "";
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Quotes a string and appends the result to a given Writer.
-     *
-     * @param string The input string to be quoted.
-     * @param w      The Writer to which the quoted string will be appended.
-     * @return The same Writer instance after appending the quoted string.
-     * @throws IOException If an I/O error occurs while writing to the Writer.
-     */
     public static Writer quote(String string, Writer w) throws IOException {
-        if (string == null || string.isEmpty()) {
-            w.write("\"\"");
-            return w;
-        }
-
-        char b;
-        char c = 0;
-        int i;
-        int len = string.length();
-
-        w.write('"');
-        for (i = 0; i < len; i += 1) {
-            b = c;
-            c = string.charAt(i);
-            switch (c) {
-            case '\\':
-            case '"':
-                w.write('\\');
-                w.write(c);
-                break;
-            case '/':
-                if (b == '<') {
-                    w.write('\\');
-                }
-                w.write(c);
-                break;
-            case '\b':
-                w.write("\\b");
-                break;
-            case '\t':
-                w.write("\\t");
-                break;
-            case '\n':
-                w.write("\\n");
-                break;
-            case '\f':
-                w.write("\\f");
-                break;
-            case '\r':
-                w.write("\\r");
-                break;
-            default:
-                writeAsHex(w, c);
-            }
-        }
-        w.write('"');
-        return w;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -2609,8 +1243,7 @@ public class JSONObject {
      */
     private static void writeAsHex(Writer w, char c) throws IOException {
         String hhhh;
-        if (c < ' ' || (c >= '\u0080' && c < '\u00a0')
-                || (c >= '\u2000' && c < '\u2100')) {
+        if (c < ' ' || (c >= '\u0080' && c < '\u00a0') || (c >= '\u2000' && c < '\u2100')) {
             w.write("\\u");
             hhhh = Integer.toHexString(c);
             w.write("0000", 0, 4 - hhhh.length());
@@ -2620,52 +1253,25 @@ public class JSONObject {
         }
     }
 
-    /**
-     * Remove a name and its value, if present.
-     *
-     * @param key
-     *            The name to be removed.
-     * @return The value that was associated with the name, or null if there was
-     *         no value.
-     */
     public Object remove(String key) {
-        return this.map.remove(key);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Determine if two JSONObjects are similar.
-     * They must contain the same set of names which must be associated with
-     * similar values.
-     *
-     * @param other The other JSONObject
-     * @return true if they are equal
-     */
     public boolean similar(Object other) {
-        try {
-            if (!(other instanceof JSONObject)) {
-                return false;
-            }
-            if (!this.keySet().equals(((JSONObject)other).keySet())) {
-                return false;
-            }
-            return checkSimilarEntries(other);
-        } catch (Exception e) {
-            return false;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     private boolean checkSimilarEntries(Object other) {
-        for (final Entry<String,?> entry : this.entrySet()) {
+        for (final Entry<String, ?> entry : this.entrySet()) {
             String name = entry.getKey();
             Object valueThis = entry.getValue();
-            Object valueOther = ((JSONObject)other).get(name);
-            if(valueThis == valueOther) {
+            Object valueOther = ((JSONObject) other).get(name);
+            if (valueThis == valueOther) {
                 continue;
             }
-            if(valueThis == null) {
+            if (valueThis == null) {
                 return false;
             }
-
             if (!checkObjectType(valueThis, valueOther)) {
                 return false;
             }
@@ -2681,11 +1287,11 @@ public class JSONObject {
      */
     private boolean checkObjectType(Object valueThis, Object valueOther) {
         if (valueThis instanceof JSONObject) {
-            return ((JSONObject)valueThis).similar(valueOther);
+            return ((JSONObject) valueThis).similar(valueOther);
         } else if (valueThis instanceof JSONArray) {
-            return ((JSONArray)valueThis).similar(valueOther);
+            return ((JSONArray) valueThis).similar(valueOther);
         } else if (valueThis instanceof Number && valueOther instanceof Number) {
-            return isNumberSimilar((Number)valueThis, (Number)valueOther);
+            return isNumberSimilar((Number) valueThis, (Number) valueOther);
         } else if (valueThis instanceof JSONString && valueOther instanceof JSONString) {
             return ((JSONString) valueThis).toJSONString().equals(((JSONString) valueOther).toJSONString());
         } else if (!valueThis.equals(valueOther)) {
@@ -2694,44 +1300,8 @@ public class JSONObject {
         return true;
     }
 
-    /**
-     * Compares two numbers to see if they are similar.
-     *
-     * If either of the numbers are Double or Float instances, then they are checked to have
-     * a finite value. If either value is not finite (NaN or &#177;infinity), then this
-     * function will always return false. If both numbers are finite, they are first checked
-     * to be the same type and implement {@link Comparable}. If they do, then the actual
-     * {@link Comparable#compareTo(Object)} is called. If they are not the same type, or don't
-     * implement Comparable, then they are converted to {@link BigDecimal}s. Finally the
-     * BigDecimal values are compared using {@link BigDecimal#compareTo(BigDecimal)}.
-     *
-     * @param l the Left value to compare. Can not be <code>null</code>.
-     * @param r the right value to compare. Can not be <code>null</code>.
-     * @return true if the numbers are similar, false otherwise.
-     */
     static boolean isNumberSimilar(Number l, Number r) {
-        if (!numberIsFinite(l) || !numberIsFinite(r)) {
-            // non-finite numbers are never similar
-            return false;
-        }
-
-        // if the classes are the same and implement Comparable
-        // then use the built in compare first.
-        if(l.getClass().equals(r.getClass()) && l instanceof Comparable) {
-            @SuppressWarnings({ "rawtypes", "unchecked" })
-            int compareTo = ((Comparable)l).compareTo(r);
-            return compareTo==0;
-        }
-
-        // BigDecimal should be able to handle all of our number types that we support through
-        // documentation. Convert to BigDecimal first, then use the Compare method to
-        // decide equality.
-        final BigDecimal lBigDecimal = objectToBigDecimal(l, null, false);
-        final BigDecimal rBigDecimal = objectToBigDecimal(r, null, false);
-        if (lBigDecimal == null || rBigDecimal == null) {
-            return false;
-        }
-        return lBigDecimal.compareTo(rBigDecimal) == 0;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     private static boolean numberIsFinite(Number n) {
@@ -2743,15 +1313,8 @@ public class JSONObject {
         return true;
     }
 
-    /**
-     * Tests if the value should be tried as a decimal. It makes no test if there are actual digits.
-     *
-     * @param val value to test
-     * @return true if the string is "-0" or if it contains '.', 'e', or 'E', false otherwise.
-     */
     protected static boolean isDecimalNotation(final String val) {
-        return val.indexOf('.') > -1 || val.indexOf('e') > -1
-                || val.indexOf('E') > -1 || "-0".equals(val);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -2768,7 +1331,7 @@ public class JSONObject {
     // Changes to this method must be copied to the corresponding method in
     // the XML class to keep full support for Android
     public static Object stringToValue(String str) {
-        return stringToValue(str, new JSONParserConfiguration());
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -2784,83 +1347,11 @@ public class JSONObject {
     // Changes to this method must be copied to the corresponding method in
     // the XML class to keep full support for Android
     public static Object stringToValue(String string, JSONParserConfiguration jsonParserConfiguration) {
-        if ("".equals(string)) {
-            return string;
-        }
-
-        // check JSON key words true/false/null
-        if ("true".equalsIgnoreCase(string)) {
-            return Boolean.TRUE;
-        }
-        if ("false".equalsIgnoreCase(string)) {
-            return Boolean.FALSE;
-        }
-        if ("null".equalsIgnoreCase(string)) {
-            return JSONObject.NULL;
-        }
-
-        /*
-         * If it might be a number, try converting it. If a number cannot be
-         * produced, then the value will just be a string.
-         */
-
-        char initial = string.charAt(0);
-        if ((initial >= '0' && initial <= '9') || initial == '-') {
-            try {
-                if (jsonParserConfiguration == null) {
-                    jsonParserConfiguration = new JSONParserConfiguration();
-                }
-                // user declines max number checking
-                if (jsonParserConfiguration.getMaxNumberLength() == ParserConfiguration.UNDEFINED_MAXIMUM_NUMBER_LENGTH) {
-                    return stringToNumber(string);
-                }
-                if (string.length() <= jsonParserConfiguration.getMaxNumberLength()) {
-                	return stringToNumber(string);
-                }
-            } catch (Exception ignore) {
-                // Do nothing
-            }
-        }
-        return string;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Converts a string to a number using the narrowest possible type. Possible
-     * returns for this function are BigDecimal, Double, BigInteger, Long, and Integer.
-     * When a Double is returned, it should always be a valid Double and not NaN or +-infinity.
-     *
-     * @param val value to convert
-     * @return Number representation of the value.
-     * @throws NumberFormatException thrown if the value is not a valid number. A public
-     *      caller should catch this and wrap it in a {@link JSONException} if applicable.
-     */
     protected static Number stringToNumber(final String val) throws NumberFormatException {
-        char initial = val.charAt(0);
-        if ((initial >= '0' && initial <= '9') || initial == '-') {
-            // decimal representation
-            if (isDecimalNotation(val)) {
-                return getNumber(val, initial);
-            }
-            // block items like 00 01 etc. Java number parsers treat these as Octal.
-            checkForInvalidNumberFormat(val, initial);
-            // integer representation.
-            // This will narrow any values to the smallest reasonable Object representation
-            // (Integer, Long, or BigInteger)
-
-            // BigInteger down conversion: We use a similar bitLength compare as
-            // BigInteger#intValueExact uses. Increases GC, but objects hold
-            // only what they need. i.e. Less runtime overhead if the value is
-            // long lived.
-            BigInteger bi = new BigInteger(val);
-            if(bi.bitLength() <= 31){
-                return Integer.valueOf(bi.intValue());
-            }
-            if(bi.bitLength() <= 63){
-                return Long.valueOf(bi.longValue());
-            }
-            return bi;
-        }
-        throw new NumberFormatException("val ["+val+"] is not a valid number.");
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -2870,16 +1361,16 @@ public class JSONObject {
      * @throws exceptions if numbers are formatted incorrectly
      */
     private static void checkForInvalidNumberFormat(String val, char initial) {
-        if(initial == '0' && val.length() > 1) {
+        if (initial == '0' && val.length() > 1) {
             char at1 = val.charAt(1);
-            if(at1 >= '0' && at1 <= '9') {
-                throw new NumberFormatException("val ["+ val +"] is not a valid number.");
+            if (at1 >= '0' && at1 <= '9') {
+                throw new NumberFormatException("val [" + val + "] is not a valid number.");
             }
         } else if (initial == '-' && val.length() > 2) {
             char at1 = val.charAt(1);
             char at2 = val.charAt(2);
-            if(at1 == '0' && at2 >= '0' && at2 <= '9') {
-                throw new NumberFormatException("val ["+ val +"] is not a valid number.");
+            if (at1 == '0' && at2 >= '0' && at2 <= '9') {
+                throw new NumberFormatException("val [" + val + "] is not a valid number.");
             }
         }
     }
@@ -2896,7 +1387,7 @@ public class JSONObject {
         // keep that by forcing a decimal.
         try {
             BigDecimal bd = new BigDecimal(val);
-            if(initial == '-' && BigDecimal.ZERO.compareTo(bd)==0) {
+            if (initial == '-' && BigDecimal.ZERO.compareTo(bd) == 0) {
                 return Double.valueOf(-0.0);
             }
             return bd;
@@ -2904,179 +1395,48 @@ public class JSONObject {
             // this is to support "Hex Floats" like this: 0x1.0P-1074
             try {
                 Double d = Double.valueOf(val);
-                if(d.isNaN() || d.isInfinite()) {
-                    throw new NumberFormatException("val ["+ val +"] is not a valid number.");
+                if (d.isNaN() || d.isInfinite()) {
+                    throw new NumberFormatException("val [" + val + "] is not a valid number.");
                 }
                 return d;
             } catch (NumberFormatException ignore) {
-                throw new NumberFormatException("val ["+ val +"] is not a valid number.");
+                throw new NumberFormatException("val [" + val + "] is not a valid number.");
             }
         }
     }
 
-    /**
-     * Throw an exception if the object is a NaN or infinite number.
-     *
-     * @param o
-     *            The object to test.
-     * @throws JSONException
-     *             If o is a non-finite number.
-     */
     public static void testValidity(Object o) throws JSONException {
-        if (o instanceof Number && !numberIsFinite((Number) o)) {
-            throw new JSONException("JSON does not allow non-finite numbers.");
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Produce a JSONArray containing the values of the members of this
-     * JSONObject.
-     *
-     * @param names
-     *            A JSONArray containing a list of key strings. This determines
-     *            the sequence of the values in the result.
-     * @return A JSONArray of values.
-     * @throws JSONException
-     *             If any of the values are non-finite numbers.
-     */
     public JSONArray toJSONArray(JSONArray names) throws JSONException {
-        if (names == null || names.isEmpty()) {
-            return null;
-        }
-        JSONArray ja = new JSONArray();
-        for (int i = 0; i < names.length(); i += 1) {
-            ja.put(this.opt(names.getString(i)));
-        }
-        return ja;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Make a JSON text of this JSONObject. For compactness, no whitespace is
-     * added. If this would not result in a syntactically correct JSON text,
-     * then null will be returned instead.
-     * <p><b>
-     * Warning: This method assumes that the data structure is acyclical.
-     * </b>
-     *
-     * @return a printable, displayable, portable, transmittable representation
-     *         of the object, beginning with <code>{</code>&nbsp;<small>(left
-     *         brace)</small> and ending with <code>}</code>&nbsp;<small>(right
-     *         brace)</small>.
-     */
     @Override
     public String toString() {
-        try {
-            return this.toString(0);
-        } catch (Exception e) {
-            return null;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Make a pretty-printed JSON text of this JSONObject.
-     *
-     * <p>If <pre>{@code indentFactor > 0}</pre> and the {@link JSONObject}
-     * has only one key, then the object will be output on a single line:
-     * <pre>{@code {"key": 1}}</pre>
-     *
-     * <p>If an object has 2 or more keys, then it will be output across
-     * multiple lines: <pre>{@code {
-     *  "key1": 1,
-     *  "key2": "value 2",
-     *  "key3": 3
-     * }}</pre>
-     * <p><b>
-     * Warning: This method assumes that the data structure is acyclical.
-     * </b>
-     *
-     * @param indentFactor
-     *            The number of spaces to add to each level of indentation.
-     * @return a printable, displayable, portable, transmittable representation
-     *         of the object, beginning with <code>{</code>&nbsp;<small>(left
-     *         brace)</small> and ending with <code>}</code>&nbsp;<small>(right
-     *         brace)</small>.
-     * @throws JSONException
-     *             If the object contains an invalid number.
-     */
     @SuppressWarnings("resource")
     public String toString(int indentFactor) throws JSONException {
-        // 6 characters are the minimum to serialise a key value pair e.g.: "k":1,
-        // and we don't want to oversize the initial capacity
-        int initialSize = map.size() * 6;
-        Writer w = new StringBuilderWriter(Math.max(initialSize, 16));
-        return this.write(w, indentFactor, 0).toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Make a JSON text of an Object value. If the object has an
-     * value.toJSONString() method, then that method will be used to produce the
-     * JSON text. The method is required to produce a strictly conforming text.
-     * If the object does not contain a toJSONString method (which is the most
-     * common case), then a text will be produced by other means. If the value
-     * is an array or Collection, then a JSONArray will be made from it and its
-     * toJSONString method will be called. If the value is a MAP, then a
-     * JSONObject will be made from it and its toJSONString method will be
-     * called. Otherwise, the value's toString method will be called, and the
-     * result will be quoted.
-     *
-     * <p>
-     * Warning: This method assumes that the data structure is acyclical.
-     *
-     * @param value
-     *            The value to be serialized.
-     * @return a printable, displayable, transmittable representation of the
-     *         object, beginning with <code>{</code>&nbsp;<small>(left
-     *         brace)</small> and ending with <code>}</code>&nbsp;<small>(right
-     *         brace)</small>.
-     * @throws JSONException
-     *             If the value is or contains an invalid number.
-     */
     public static String valueToString(Object value) throws JSONException {
-    	// moves the implementation to JSONWriter as:
-    	// 1. It makes more sense to be part of the writer class
-    	// 2. For Android support this method is not available. By implementing it in the Writer
-    	//    Android users can use the writer with the built in Android JSONObject implementation.
-        return JSONWriter.valueToString(value);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Wrap an object, if necessary. If the object is <code>null</code>, return the NULL
-     * object. If it is an array or collection, wrap it in a JSONArray. If it is
-     * a map, wrap it in a JSONObject. If it is a standard property (Double,
-     * String, et al) then it is already wrapped. Otherwise, if it comes from
-     * one of the java packages, turn it into a string. And if it doesn't, try
-     * to wrap it in a JSONObject. If the wrapping fails, then null is returned.
-     *
-     * @param object
-     *            The object to wrap
-     * @return The wrapped value
-     */
     public static Object wrap(Object object) {
-        return wrap(object, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Wrap an object, if necessary. If the object is <code>null</code>, return the NULL
-     * object. If it is an array or collection, wrap it in a JSONArray. If it is
-     * a map, wrap it in a JSONObject. If it is a standard property (Double,
-     * String, et al) then it is already wrapped. Otherwise, if it comes from
-     * one of the java packages, turn it into a string. And if it doesn't, try
-     * to wrap it in a JSONObject. If the wrapping fails, then null is returned.
-     *
-     * @param object
-     *            The object to wrap
-     * @param recursionDepth
-     *            Variable for tracking the count of nested object creations.
-     * @param jsonParserConfiguration
-     *            Variable to pass parser custom configuration for json parsing.
-     * @return The wrapped value
-     */
     static Object wrap(Object object, int recursionDepth, JSONParserConfiguration jsonParserConfiguration) {
-      return wrap(object, null, recursionDepth, jsonParserConfiguration);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     private static Object wrap(Object object, Set<Object> objectsRecord) {
-      return wrap(object, objectsRecord, 0, new JSONParserConfiguration());
+        return wrap(object, objectsRecord, 0, new JSONParserConfiguration());
     }
 
     private static Object wrap(Object object, Set<Object> objectsRecord, int recursionDepth, JSONParserConfiguration jsonParserConfiguration) {
@@ -3084,17 +1444,9 @@ public class JSONObject {
             if (NULL.equals(object)) {
                 return NULL;
             }
-            if (object instanceof JSONObject || object instanceof JSONArray
-                    || object instanceof JSONString || object instanceof String
-                    || object instanceof Byte || object instanceof Character
-                    || object instanceof Short || object instanceof Integer
-                    || object instanceof Long || object instanceof Boolean
-                    || object instanceof Float || object instanceof Double
-                    || object instanceof BigInteger || object instanceof BigDecimal
-                    || object instanceof Enum) {
+            if (object instanceof JSONObject || object instanceof JSONArray || object instanceof JSONString || object instanceof String || object instanceof Byte || object instanceof Character || object instanceof Short || object instanceof Integer || object instanceof Long || object instanceof Boolean || object instanceof Float || object instanceof Double || object instanceof BigInteger || object instanceof BigDecimal || object instanceof Enum) {
                 return object;
             }
-
             if (object instanceof Collection) {
                 Collection<?> coll = (Collection<?>) object;
                 return new JSONArray(coll, recursionDepth, jsonParserConfiguration);
@@ -3107,74 +1459,28 @@ public class JSONObject {
                 return new JSONObject(map, recursionDepth, jsonParserConfiguration);
             }
             Package objectPackage = object.getClass().getPackage();
-            String objectPackageName = objectPackage != null ? objectPackage
-                    .getName() : "";
-            if (objectPackageName.startsWith("java.")
-                    || objectPackageName.startsWith("javax.")
-                    || object.getClass().getClassLoader() == null) {
+            String objectPackageName = objectPackage != null ? objectPackage.getName() : "";
+            if (objectPackageName.startsWith("java.") || objectPackageName.startsWith("javax.") || object.getClass().getClassLoader() == null) {
                 return object.toString();
             }
             if (objectsRecord != null) {
                 return new JSONObject(object, objectsRecord);
             }
             return new JSONObject(object);
-        }
-        catch (JSONException exception) {
+        } catch (JSONException exception) {
             throw exception;
         } catch (Exception exception) {
             return null;
         }
     }
 
-    /**
-     * Write the contents of the JSONObject as JSON text to a writer. For
-     * compactness, no whitespace is added.
-     * <p><b>
-     * Warning: This method assumes that the data structure is acyclical.
-     * </b>
-     * @param writer the writer object
-     * @return The writer.
-     * @throws JSONException if a called function has an error
-     */
     public Writer write(Writer writer) throws JSONException {
-        return this.write(writer, 0, 0);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @SuppressWarnings("resource")
-    static final Writer writeValue(Writer writer, Object value,
-            int indentFactor, int indent) throws JSONException, IOException {
-        if (value == null || value.equals(null)) {
-            writer.write("null");
-        } else if (value instanceof JSONString) {
-            // may throw an exception
-            processJsonStringToWriteValue(writer, value);
-        } else if (value instanceof String) {
-            // assuming most values are Strings, so testing it early
-            quote(value.toString(), writer);
-            return writer;
-        } else if (value instanceof Number) {
-            // may throw an exception
-            processNumberToWriteValue(writer, (Number) value);
-        } else if (value instanceof Boolean) {
-            writer.write(value.toString());
-        } else if (value instanceof Enum<?>) {
-            writer.write(quote(((Enum<?>)value).name()));
-        } else if (value instanceof JSONObject) {
-            ((JSONObject) value).write(writer, indentFactor, indent);
-        } else if (value instanceof JSONArray) {
-            ((JSONArray) value).write(writer, indentFactor, indent);
-        } else if (value instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) value;
-            new JSONObject(map).write(writer, indentFactor, indent);
-        } else if (value instanceof Collection) {
-            Collection<?> coll = (Collection<?>) value;
-            new JSONArray(coll).write(writer, indentFactor, indent);
-        } else if (value.getClass().isArray()) {
-            new JSONArray(value).write(writer, indentFactor, indent);
-        } else {
-            quote(value.toString(), writer);
-        }
-        return writer;
+    static final Writer writeValue(Writer writer, Object value, int indentFactor, int indent) throws JSONException, IOException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -3203,7 +1509,7 @@ public class JSONObject {
     private static void processNumberToWriteValue(Writer writer, Number value) throws IOException {
         // not all Numbers may match actual JSON Numbers. i.e. fractions or Imaginary
         final String numberAsString = numberToString(value);
-        if(NUMBER_PATTERN.matcher(numberAsString).matches()) {
+        if (NUMBER_PATTERN.matcher(numberAsString).matches()) {
             writer.write(numberAsString);
         } else {
             // The Number value is not a valid JSON number.
@@ -3213,64 +1519,12 @@ public class JSONObject {
     }
 
     static final void indent(Writer writer, int indent) throws IOException {
-        for (int i = 0; i < indent; i += 1) {
-            writer.write(' ');
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Write the contents of the JSONObject as JSON text to a writer.
-     *
-     * <p>If <pre>{@code indentFactor > 0}</pre> and the {@link JSONObject}
-     * has only one key, then the object will be output on a single line:
-     * <pre>{@code {"key": 1}}</pre>
-     *
-     * <p>If an object has 2 or more keys, then it will be output across
-     * multiple lines: <pre>{@code {
-     *  "key1": 1,
-     *  "key2": "value 2",
-     *  "key3": 3
-     * }}</pre>
-     * <p><b>
-     * Warning: This method assumes that the data structure is acyclical.
-     * </b>
-     *
-     * @param writer
-     *            Writes the serialized JSON
-     * @param indentFactor
-     *            The number of spaces to add to each level of indentation.
-     * @param indent
-     *            The indentation of the top level.
-     * @return The writer.
-     * @throws JSONException if a called function has an error or a write error
-     * occurs
-     */
     @SuppressWarnings("resource")
-    public Writer write(Writer writer, int indentFactor, int indent)
-            throws JSONException {
-        try {
-            boolean needsComma = false;
-            final int length = this.length();
-            writer.write('{');
-
-            if (length == 1) {
-            	final Entry<String,?> entry = this.entrySet().iterator().next();
-                final String key = entry.getKey();
-                writer.write(quote(key));
-                writer.write(':');
-                if (indentFactor > 0) {
-                    writer.write(' ');
-                }
-                // might throw an exception
-                attemptWriteValue(writer, indentFactor, indent, entry, key);
-            } else if (length != 0) {
-                writeContent(writer, indentFactor, indent, needsComma);
-            }
-            writer.write('}');
-            return writer;
-        } catch (IOException exception) {
-            throw new JSONException(exception);
-        }
+    public Writer write(Writer writer, int indentFactor, int indent) throws JSONException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -3288,7 +1542,7 @@ public class JSONObject {
      */
     private void writeContent(Writer writer, int indentFactor, int indent, boolean needsComma) throws IOException {
         final int newIndent = indent + indentFactor;
-        for (final Entry<String,?> entry : this.entrySet()) {
+        for (final Entry<String, ?> entry : this.entrySet()) {
             if (needsComma) {
                 writer.write(',');
             }
@@ -3325,41 +1579,17 @@ public class JSONObject {
      *            Identifies the value
      * @throws JSONException if a called function has an error or a write error
      * occurs
-
      */
     private static void attemptWriteValue(Writer writer, int indentFactor, int indent, Entry<String, ?> entry, String key) {
-        try{
+        try {
             writeValue(writer, entry.getValue(), indentFactor, indent);
         } catch (Exception e) {
             throw new JSONException("Unable to write JSONObject value for key: " + key, e);
         }
     }
 
-    /**
-     * Returns a java.util.Map containing all of the entries in this object.
-     * If an entry in the object is a JSONArray or JSONObject it will also
-     * be converted.
-     * <p>
-     * Warning: This method assumes that the data structure is acyclical.
-     *
-     * @return a java.util.Map containing the entries of this object
-     */
     public Map<String, Object> toMap() {
-        Map<String, Object> results = new HashMap<String, Object>();
-        for (Entry<String, Object> entry : this.entrySet()) {
-            Object value;
-            if (entry.getValue() == null || NULL.equals(entry.getValue())) {
-                value = null;
-            } else if (entry.getValue() instanceof JSONObject) {
-                value = ((JSONObject) entry.getValue()).toMap();
-            } else if (entry.getValue() instanceof JSONArray) {
-                value = ((JSONArray) entry.getValue()).toList();
-            } else {
-                value = entry.getValue();
-            }
-            results.put(entry.getKey(), value);
-        }
-        return results;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -3369,26 +1599,15 @@ public class JSONObject {
      * @param cause optional cause of the coercion failure
      * @return JSONException that can be thrown.
      */
-    private static JSONException wrongValueFormatException(
-            String key,
-            String valueType,
-            Object value,
-            Throwable cause) {
-        if(value == null) {
-
-            return new JSONException(
-                    "JSONObject[" + quote(key) + "] is not a " + valueType + " (null)."
-                    , cause);
+    private static JSONException wrongValueFormatException(String key, String valueType, Object value, Throwable cause) {
+        if (value == null) {
+            return new JSONException("JSONObject[" + quote(key) + "] is not a " + valueType + " (null).", cause);
         }
         // don't try to toString collections or known object types that could be large.
-        if(value instanceof Map || value instanceof Iterable || value instanceof JSONObject) {
-            return new JSONException(
-                    "JSONObject[" + quote(key) + "] is not a " + valueType + " (" + value.getClass() + ")."
-                    , cause);
+        if (value instanceof Map || value instanceof Iterable || value instanceof JSONObject) {
+            return new JSONException("JSONObject[" + quote(key) + "] is not a " + valueType + " (" + value.getClass() + ").", cause);
         }
-        return new JSONException(
-                "JSONObject[" + quote(key) + "] is not a " + valueType + " (" + value.getClass() + " : " + value + ")."
-                , cause);
+        return new JSONException("JSONObject[" + quote(key) + "] is not a " + valueType + " (" + value.getClass() + " : " + value + ").", cause);
     }
 
     /**
@@ -3397,9 +1616,7 @@ public class JSONObject {
      * @return JSONException that can be thrown.
      */
     private static JSONException recursivelyDefinedObjectException(String key) {
-        return new JSONException(
-            "JavaBean object contains recursively defined member variable of key " + quote(key)
-        );
+        return new JSONException("JavaBean object contains recursively defined member variable of key " + quote(key));
     }
 
     /**
@@ -3411,9 +1628,11 @@ public class JSONObject {
         } else if (type instanceof ParameterizedType) {
             return (Class<?>) ((ParameterizedType) type).getRawType();
         } else if (type instanceof GenericArrayType) {
-            return Object[].class; // Simplified handling for arrays
+            // Simplified handling for arrays
+            return Object[].class;
         }
-        return Object.class; // Fallback
+        // Fallback
+        return Object.class;
     }
 
     /**
@@ -3437,70 +1656,17 @@ public class JSONObject {
                 return args;
             }
         }
-        return new Type[]{Object.class, Object.class}; // Default: String keys, Object values
+        // Default: String keys, Object values
+        return new Type[] { Object.class, Object.class };
     }
 
-    /**
-     * Deserializes a JSON string into an instance of the specified class.
-     *
-     * <p>This method attempts to map JSON key-value pairs to the corresponding fields
-     * of the given class. It supports basic data types including int, double, float,
-     * long, and boolean (as well as their boxed counterparts). The class must have a
-     * no-argument constructor, and the field names in the class must match the keys
-     * in the JSON string.
-     *
-     * @param <T> the type of the object to return
-     * @param jsonString json in string format
-     * @param clazz the class of the object to be returned
-     * @return an instance of Object T with fields populated from the JSON string
-     */
     public static <T> T fromJson(String jsonString, Class<T> clazz) {
-        JSONObject jsonObject = new JSONObject(jsonString);
-        return jsonObject.fromJson(clazz);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Deserializes a JSON string into an instance of the specified class.
-     *
-     * <p>This method attempts to map JSON key-value pairs to the corresponding fields
-     * of the given class. It supports basic data types including {@code int}, {@code double},
-     * {@code float}, {@code long}, and {@code boolean}, as well as their boxed counterparts.
-     * The target class must have a no-argument constructor, and its field names must match
-     * the keys in the JSON string. Static fields are ignored.
-     *
-     * <p><strong>Note:</strong> Only classes that are explicitly supported and registered within
-     * the {@code JSONObject} context can be deserialized. If the provided class is not among those,
-     * this method will not be able to deserialize it. This ensures that only a limited and
-     * controlled set of types can be instantiated from JSON for safety and predictability.
-     *
-     * @param clazz the class of the object to be returned
-     * @param <T> the type of the object
-     * @return an instance of type {@code T} with fields populated from the JSON string
-     * @throws IllegalArgumentException if the class is not supported for deserialization
-     */
     @SuppressWarnings("unchecked")
     public <T> T fromJson(Class<T> clazz) {
-        try {
-            T obj = clazz.getDeclaredConstructor().newInstance();
-            for (Field field : clazz.getDeclaredFields()) {
-                if (Modifier.isStatic(field.getModifiers())) {
-                    continue;
-                }
-                field.setAccessible(true);
-                String fieldName = field.getName();
-                if (has(fieldName)) {
-                    Object value = get(fieldName);
-                    Type fieldType = field.getGenericType();
-                    Object convertedValue = convertValue(value, fieldType);
-                    field.set(obj, convertedValue);
-                }
-            }
-            return obj;
-        } catch (NoSuchMethodException e) {
-            throw new JSONException("No no-arg constructor for class: " + clazz.getName(), e);
-        } catch (Exception e) {
-            throw new JSONException("Failed to instantiate or set field for class: " + clazz.getName(), e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -3510,14 +1676,11 @@ public class JSONObject {
         if (value == null) {
             return null;
         }
-
         Class<?> rawType = getRawType(targetType);
-
         // Direct assignment
         if (rawType.isAssignableFrom(value.getClass())) {
             return value;
         }
-
         if (rawType == int.class || rawType == Integer.class) {
             return ((Number) value).intValue();
         } else if (rawType == double.class || rawType == Double.class) {
@@ -3535,32 +1698,27 @@ public class JSONObject {
         } else if (rawType == BigInteger.class) {
             return new BigInteger((String) value);
         }
-
         // Enum conversion
         if (rawType.isEnum() && value instanceof String) {
             return stringToEnum(rawType, (String) value);
         }
-
         // Collection handling (e.g., List<List<Map<String, Integer>>>)
         if (Collection.class.isAssignableFrom(rawType)) {
             if (value instanceof JSONArray) {
                 Type elementType = getElementType(targetType);
                 return fromJsonArray((JSONArray) value, rawType, elementType);
             }
-        }
-        // Map handling (e.g., Map<Integer, List<String>>)
-        else if (Map.class.isAssignableFrom(rawType) && value instanceof JSONObject) {
+        } else // Map handling (e.g., Map<Integer, List<String>>)
+        if (Map.class.isAssignableFrom(rawType) && value instanceof JSONObject) {
             Type[] mapTypes = getMapTypes(targetType);
             Type keyType = mapTypes[0];
             Type valueType = mapTypes[1];
             return convertToMap((JSONObject) value, keyType, valueType, rawType);
-        }
-        // POJO handling (including custom classes like Tuple<Integer, String, Integer>)
-        else if (!rawType.isPrimitive() && !rawType.isEnum() && value instanceof JSONObject) {
+        } else // POJO handling (including custom classes like Tuple<Integer, String, Integer>)
+        if (!rawType.isPrimitive() && !rawType.isEnum() && value instanceof JSONObject) {
             // Recurse with the raw class for POJO deserialization
             return ((JSONObject) value).fromJson(rawType);
         }
-
         // Fallback
         return value.toString();
     }
@@ -3573,7 +1731,6 @@ public class JSONObject {
         try {
             @SuppressWarnings("unchecked")
             Map<Object, Object> createdMap = new HashMap();
-
             for (Object keyObj : jsonMap.keySet()) {
                 String keyStr = (String) keyObj;
                 Object mapValue = jsonMap.get(keyStr);
@@ -3616,7 +1773,6 @@ public class JSONObject {
     private <T> Collection<T> fromJsonArray(JSONArray jsonArray, Class<?> collectionType, Type elementType) throws JSONException {
         try {
             Collection<T> collection = getCollection(collectionType);
-
             for (int i = 0; i < jsonArray.length(); i++) {
                 Object jsonElement = jsonArray.get(i);
                 // Recursively convert each element using the full element Type (handles nesting)
@@ -3630,23 +1786,23 @@ public class JSONObject {
     }
 
     /**
-    * Creates and returns a new instance of a supported {@link Collection} implementation
-    * based on the specified collection type.
-    * <p>
-    * This method currently supports the following collection types:
-    * <ul>
-    *   <li>{@code List.class}</li>
-    *   <li>{@code ArrayList.class}</li>
-    *   <li>{@code Set.class}</li>
-    *   <li>{@code HashSet.class}</li>
-    * </ul>
-    * If the provided type does not match any of the supported types, a {@link JSONException}
-    * is thrown.
-    *
-    * @param collectionType the {@link Class} object representing the desired collection type
-    * @return a new empty instance of the specified collection type
-    * @throws JSONException if the specified type is not a supported collection type
-    */
+     * Creates and returns a new instance of a supported {@link Collection} implementation
+     * based on the specified collection type.
+     * <p>
+     * This method currently supports the following collection types:
+     * <ul>
+     *   <li>{@code List.class}</li>
+     *   <li>{@code ArrayList.class}</li>
+     *   <li>{@code Set.class}</li>
+     *   <li>{@code HashSet.class}</li>
+     * </ul>
+     * If the provided type does not match any of the supported types, a {@link JSONException}
+     * is thrown.
+     *
+     * @param collectionType the {@link Class} object representing the desired collection type
+     * @return a new empty instance of the specified collection type
+     * @throws JSONException if the specified type is not a supported collection type
+     */
     private Collection getCollection(Class<?> collectionType) throws JSONException {
         if (collectionType == List.class || collectionType == ArrayList.class) {
             return new ArrayList();

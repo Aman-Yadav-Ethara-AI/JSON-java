@@ -1,12 +1,12 @@
 package org.json;
+
 /*
 Public Domain.
 */
-
 /**
  * Configuration object for the XML to JSONML parser. The configuration is immutable.
  */
-@SuppressWarnings({""})
+@SuppressWarnings({ "" })
 public class JSONMLParserConfiguration extends ParserConfiguration {
 
     /**
@@ -14,12 +14,15 @@ public class JSONMLParserConfiguration extends ParserConfiguration {
      */
     public static final int DEFAULT_MAXIMUM_NESTING_DEPTH = ParserConfiguration.DEFAULT_MAXIMUM_NESTING_DEPTH;
 
-    /** Original Configuration of the XML to JSONML Parser. */
-    public static final JSONMLParserConfiguration ORIGINAL
-        = new JSONMLParserConfiguration();
-    /** Original configuration of the XML to JSONML Parser except that values are kept as strings. */
-    public static final JSONMLParserConfiguration KEEP_STRINGS
-        = new JSONMLParserConfiguration().withKeepStrings(true);
+    /**
+     * Original Configuration of the XML to JSONML Parser.
+     */
+    public static final JSONMLParserConfiguration ORIGINAL = new JSONMLParserConfiguration();
+
+    /**
+     * Original configuration of the XML to JSONML Parser except that values are kept as strings.
+     */
+    public static final JSONMLParserConfiguration KEEP_STRINGS = new JSONMLParserConfiguration().withKeepStrings(true);
 
     /**
      * Default parser configuration. Does not keep strings (tries to implicitly convert values).
@@ -39,31 +42,20 @@ public class JSONMLParserConfiguration extends ParserConfiguration {
         super(keepStrings, maxNestingDepth);
     }
 
-    /**
-     * Provides a new instance of the same configuration.
-     */
     @Override
     protected JSONMLParserConfiguration clone() {
-        // future modifications to this method should always ensure a "deep"
-        // clone in the case of collections. i.e. if a Map is added as a configuration
-        // item, a new map instance should be created and if possible each value in the
-        // map should be cloned as well. If the values of the map are known to also
-        // be immutable, then a shallow clone of the map is acceptable.
-        return new JSONMLParserConfiguration(
-                this.keepStrings,
-                this.maxNestingDepth
-        );
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public JSONMLParserConfiguration withKeepStrings(final boolean newVal) {
-        return super.withKeepStrings(newVal);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public JSONMLParserConfiguration withMaxNestingDepth(int maxNestingDepth) {
-        return super.withMaxNestingDepth(maxNestingDepth);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 }

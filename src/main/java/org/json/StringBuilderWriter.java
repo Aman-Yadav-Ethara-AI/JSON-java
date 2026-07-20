@@ -8,6 +8,7 @@ import java.io.Writer;
  * using internally a {@link StringBuilder} instead of a {@link StringBuffer}.
  */
 public class StringBuilderWriter extends Writer {
+
     private final StringBuilder builder;
 
     /**
@@ -33,60 +34,51 @@ public class StringBuilderWriter extends Writer {
 
     @Override
     public void write(int c) {
-        builder.append((char) c);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void write(char[] cbuf, int offset, int length) {
-        if ((offset < 0) || (offset > cbuf.length) || (length < 0) ||
-                ((offset + length) > cbuf.length) || ((offset + length) < 0)) {
-            throw new IndexOutOfBoundsException();
-        } else if (length == 0) {
-            return;
-        }
-        builder.append(cbuf, offset, length);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void write(String str) {
-        builder.append(str);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void write(String str, int offset, int length) {
-        builder.append(str, offset, offset + length);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public StringBuilderWriter append(CharSequence csq) {
-        write(String.valueOf(csq));
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public StringBuilderWriter append(CharSequence csq, int start, int end) {
-        if (csq == null) {
-            csq = "null";
-        }
-        return append(csq.subSequence(start, end));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public StringBuilderWriter append(char c) {
-        write(c);
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public String toString() {
-        return builder.toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void flush() {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     @Override
     public void close() throws IOException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 }

@@ -3,7 +3,6 @@ package org.json;
 /*
 Public Domain.
  */
-
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Array;
@@ -14,7 +13,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * A JSONArray is an ordered sequence of values. Its external text form is a
@@ -95,22 +93,20 @@ public class JSONArray implements Iterable<Object> {
      */
     public JSONArray(JSONTokener x, JSONParserConfiguration jsonParserConfiguration) throws JSONException {
         this();
-
         boolean isInitial = x.getPrevious() == 0;
         if (x.nextClean() != '[') {
             throw x.syntaxError("A JSONArray text must start with '['");
         }
-
         char nextChar = x.nextClean();
         if (nextChar == 0) {
             // array is unclosed. No ']' found, instead EOF
             throw x.syntaxError("Expected a ',' or ']'");
-        } else if (nextChar==',' && jsonParserConfiguration.isStrictMode()) {
-        	 throw x.syntaxError("Array content starts with a ','");
+        } else if (nextChar == ',' && jsonParserConfiguration.isStrictMode()) {
+            throw x.syntaxError("Array content starts with a ','");
         }
         if (nextChar != ']') {
             x.back();
-            for (;;) {
+            for (; ; ) {
                 if (x.nextClean() == ',') {
                     x.back();
                     this.myArrayList.add(JSONObject.NULL);
@@ -118,7 +114,8 @@ public class JSONArray implements Iterable<Object> {
                     x.back();
                     this.myArrayList.add(x.nextValue());
                 }
-                if (checkForSyntaxError(x, jsonParserConfiguration, isInitial)) return;
+                if (checkForSyntaxError(x, jsonParserConfiguration, isInitial))
+                    return;
             }
         } else {
             if (isInitial && jsonParserConfiguration.isStrictMode() && x.nextClean() != 0) {
@@ -127,7 +124,8 @@ public class JSONArray implements Iterable<Object> {
         }
     }
 
-    /** Convenience function. Checks for JSON syntax error.
+    /**
+     * Convenience function. Checks for JSON syntax error.
      * @param x                       A JSONTokener instance from which the JSONArray is constructed.
      * @param jsonParserConfiguration A JSONParserConfiguration instance that controls the behavior of the parser.
      * @param isInitial               Boolean indicating position of char
@@ -135,40 +133,39 @@ public class JSONArray implements Iterable<Object> {
      */
     private boolean checkForSyntaxError(JSONTokener x, JSONParserConfiguration jsonParserConfiguration, boolean isInitial) {
         char nextChar;
-        switch (x.nextClean()) {
-        case 0:
-            // array is unclosed. No ']' found, instead EOF
-            throw x.syntaxError("Expected a ',' or ']'");
-        case ',':
-            nextChar = x.nextClean();
-            if (nextChar == 0) {
+        switch(x.nextClean()) {
+            case 0:
                 // array is unclosed. No ']' found, instead EOF
                 throw x.syntaxError("Expected a ',' or ']'");
-            }
-            if (nextChar == ']') {
-                // trailing commas are not allowed in strict mode
-                if (jsonParserConfiguration.isStrictMode()) {
-                    throw x.syntaxError("Strict mode error: Expected another array element");
+            case ',':
+                nextChar = x.nextClean();
+                if (nextChar == 0) {
+                    // array is unclosed. No ']' found, instead EOF
+                    throw x.syntaxError("Expected a ',' or ']'");
+                }
+                if (nextChar == ']') {
+                    // trailing commas are not allowed in strict mode
+                    if (jsonParserConfiguration.isStrictMode()) {
+                        throw x.syntaxError("Strict mode error: Expected another array element");
+                    }
+                    return true;
+                }
+                if (nextChar == ',') {
+                    // Consecutive commas are not allowed in strict mode.
+                    // Otherwise, the tokener is backed up, and a null object is inserted by the calling code.
+                    if (jsonParserConfiguration.isStrictMode()) {
+                        throw x.syntaxError("Strict mode error: Expected a valid array element");
+                    }
+                }
+                x.back();
+                break;
+            case ']':
+                if (isInitial && jsonParserConfiguration.isStrictMode() && x.nextClean() != 0) {
+                    throw x.syntaxError("Strict mode error: Unparsed characters found at end of input text");
                 }
                 return true;
-            }
-            if (nextChar == ',') {
-                // Consecutive commas are not allowed in strict mode.
-                // Otherwise, the tokener is backed up, and a null object is inserted by the calling code.
-                if (jsonParserConfiguration.isStrictMode()) {
-                    throw x.syntaxError("Strict mode error: Expected a valid array element");
-                }
-            }
-            x.back();
-            break;
-        case ']':
-            if (isInitial && jsonParserConfiguration.isStrictMode() &&
-                    x.nextClean() != 0) {
-                throw x.syntaxError("Strict mode error: Unparsed characters found at end of input text");
-            }
-            return true;
-        default:
-            throw x.syntaxError("Expected a ',' or ']'");
+            default:
+                throw x.syntaxError("Expected a ',' or ']'");
         }
         return false;
     }
@@ -209,7 +206,7 @@ public class JSONArray implements Iterable<Object> {
      *            A Collection.
      */
     public JSONArray(Collection<?> collection) {
-      this(collection, 0, new JSONParserConfiguration());
+        this(collection, 0, new JSONParserConfiguration());
     }
 
     /**
@@ -236,7 +233,7 @@ public class JSONArray implements Iterable<Object> {
      */
     JSONArray(Collection<?> collection, int recursionDepth, JSONParserConfiguration jsonParserConfiguration) {
         if (recursionDepth > jsonParserConfiguration.getMaxNestingDepth()) {
-          throw new JSONException("JSONArray has reached recursion depth limit of " + jsonParserConfiguration.getMaxNestingDepth());
+            throw new JSONException("JSONArray has reached recursion depth limit of " + jsonParserConfiguration.getMaxNestingDepth());
         }
         if (collection == null) {
             this.myArrayList = new ArrayList<Object>();
@@ -291,8 +288,7 @@ public class JSONArray implements Iterable<Object> {
     public JSONArray(Object array) throws JSONException {
         this();
         if (!array.getClass().isArray()) {
-            throw new JSONException(
-                    "JSONArray initial value should be a string or collection or array.");
+            throw new JSONException("JSONArray initial value should be a string or collection or array.");
         }
         this.addAll(array, true, 0);
     }
@@ -306,1390 +302,331 @@ public class JSONArray implements Iterable<Object> {
      *             If the initial capacity is negative.
      */
     public JSONArray(int initialCapacity) throws JSONException {
-    	if (initialCapacity < 0) {
-            throw new JSONException(
-                    "JSONArray initial capacity cannot be negative.");
-    	}
-    	this.myArrayList = new ArrayList<Object>(initialCapacity);
+        if (initialCapacity < 0) {
+            throw new JSONException("JSONArray initial capacity cannot be negative.");
+        }
+        this.myArrayList = new ArrayList<Object>(initialCapacity);
     }
 
     @Override
     public Iterator<Object> iterator() {
-        return this.myArrayList.iterator();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the object value associated with an index.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return An object value.
-     * @throws JSONException
-     *             If there is no value for the index.
-     */
     public Object get(int index) throws JSONException {
-        Object object = this.opt(index);
-        if (object == null) {
-            throw new JSONException("JSONArray[" + index + "] not found.");
-        }
-        return object;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the boolean value associated with an index. The string values "true"
-     * and "false" are converted to boolean.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The truth.
-     * @throws JSONException
-     *             If there is no value for the index or if the value is not
-     *             convertible to boolean.
-     */
     public boolean getBoolean(int index) throws JSONException {
-        Object object = this.get(index);
-        if (Boolean.FALSE.equals(object)
-                || (object instanceof String && "false".equalsIgnoreCase((String) object))) {
-            return false;
-        } else if (Boolean.TRUE.equals(object)
-                || (object instanceof String && "true".equalsIgnoreCase((String) object))) {
-            return true;
-        }
-        throw wrongValueFormatException(index, "boolean", object, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the double value associated with an index.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The value.
-     * @throws JSONException
-     *             If the key is not found or if the value cannot be converted
-     *             to a number.
-     */
     public double getDouble(int index) throws JSONException {
-        final Object object = this.get(index);
-        if(object instanceof Number) {
-            return ((Number)object).doubleValue();
-        }
-        try {
-            return Double.parseDouble(object.toString());
-        } catch (Exception e) {
-            throw wrongValueFormatException(index, "double", object, e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the float value associated with a key.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The numeric value.
-     * @throws JSONException
-     *             if the key is not found or if the value is not a Number
-     *             object and cannot be converted to a number.
-     */
     public float getFloat(int index) throws JSONException {
-        final Object object = this.get(index);
-        if(object instanceof Number) {
-            return ((Number)object).floatValue();
-        }
-        try {
-            return Float.parseFloat(object.toString());
-        } catch (Exception e) {
-            throw wrongValueFormatException(index, "float", object, e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the Number value associated with a key.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The numeric value.
-     * @throws JSONException
-     *             if the key is not found or if the value is not a Number
-     *             object and cannot be converted to a number.
-     */
     public Number getNumber(int index) throws JSONException {
-        Object object = this.get(index);
-        try {
-            if (object instanceof Number) {
-                return (Number)object;
-            }
-            return JSONObject.stringToNumber(object.toString());
-        } catch (Exception e) {
-            throw wrongValueFormatException(index, "number", object, e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the enum value associated with an index.
-     * 
-     * @param <E>
-     *            Enum Type
-     * @param clazz
-     *            The type of enum to retrieve.
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The enum value at the index location
-     * @throws JSONException
-     *            if the key is not found or if the value cannot be converted
-     *            to an enum.
-     */
     public <E extends Enum<E>> E getEnum(Class<E> clazz, int index) throws JSONException {
-        E val = optEnum(clazz, index);
-        if(val==null) {
-            // JSONException should really take a throwable argument.
-            // If it did, I would re-implement this with the Enum.valueOf
-            // method and place any thrown exception in the JSONException
-            throw wrongValueFormatException(index, "enum of type "
-                    + JSONObject.quote(clazz.getSimpleName()), opt(index), null);
-        }
-        return val;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the BigDecimal value associated with an index. If the value is float
-     * or double, the {@link BigDecimal#BigDecimal(double)} constructor
-     * will be used. See notes on the constructor for conversion issues that
-     * may arise.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The value.
-     * @throws JSONException
-     *             If the key is not found or if the value cannot be converted
-     *             to a BigDecimal.
-     */
-    public BigDecimal getBigDecimal (int index) throws JSONException {
-        Object object = this.get(index);
-        BigDecimal val = JSONObject.objectToBigDecimal(object, null);
-        if(val == null) {
-            throw wrongValueFormatException(index, "BigDecimal", object, null);
-        }
-        return val;
+    public BigDecimal getBigDecimal(int index) throws JSONException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the BigInteger value associated with an index.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The value.
-     * @throws JSONException
-     *             If the key is not found or if the value cannot be converted
-     *             to a BigInteger.
-     */
-    public BigInteger getBigInteger (int index) throws JSONException {
-        return this.getBigInteger(index, new JSONParserConfiguration());
+    public BigInteger getBigInteger(int index) throws JSONException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the BigInteger value associated with an index.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param jsonParserConfiguration
-     *            A configuration whose {@code maxNumberLength} bounds the number of
-     *            decimal digits in the returned integer. Values exceeding this length
-     *            are treated as unconvertible. Pass a configuration with
-     *            {@link ParserConfiguration#UNDEFINED_MAXIMUM_NUMBER_LENGTH} to disable
-     *            this check.
-     * @return The value.
-     * @throws JSONException
-     *             If the key is not found or if the value cannot be converted
-     *             to a BigInteger.
-     */
-    public BigInteger getBigInteger (int index, JSONParserConfiguration jsonParserConfiguration)
-            throws JSONException {
-        Object object = this.get(index);
-        BigInteger val = JSONObject.objectToBigInteger(object, null, jsonParserConfiguration);
-        if(val == null) {
-            throw wrongValueFormatException(index, "BigInteger", object, null);
-        }
-        return val;
+    public BigInteger getBigInteger(int index, JSONParserConfiguration jsonParserConfiguration) throws JSONException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the int value associated with an index.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The value.
-     * @throws JSONException
-     *             If the key is not found or if the value is not a number.
-     */
     public int getInt(int index) throws JSONException {
-        final Object object = this.get(index);
-        if(object instanceof Number) {
-            return ((Number)object).intValue();
-        }
-        try {
-            return Integer.parseInt(object.toString());
-        } catch (Exception e) {
-            throw wrongValueFormatException(index, "int", object, e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the JSONArray associated with an index.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return A JSONArray value.
-     * @throws JSONException
-     *             If there is no value for the index. or if the value is not a
-     *             JSONArray
-     */
     public JSONArray getJSONArray(int index) throws JSONException {
-        Object object = this.get(index);
-        if (object instanceof JSONArray) {
-            return (JSONArray) object;
-        }
-        throw wrongValueFormatException(index, "JSONArray", object, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the JSONObject associated with an index.
-     *
-     * @param index
-     *            subscript
-     * @return A JSONObject value.
-     * @throws JSONException
-     *             If there is no value for the index or if the value is not a
-     *             JSONObject
-     */
     public JSONObject getJSONObject(int index) throws JSONException {
-        Object object = this.get(index);
-        if (object instanceof JSONObject) {
-            return (JSONObject) object;
-        }
-        throw wrongValueFormatException(index, "JSONObject", object, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the long value associated with an index.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The value.
-     * @throws JSONException
-     *             If the key is not found or if the value cannot be converted
-     *             to a number.
-     */
     public long getLong(int index) throws JSONException {
-        final Object object = this.get(index);
-        if(object instanceof Number) {
-            return ((Number)object).longValue();
-        }
-        try {
-            return Long.parseLong(object.toString());
-        } catch (Exception e) {
-            throw wrongValueFormatException(index, "long", object, e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the string associated with an index.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return A string value.
-     * @throws JSONException
-     *             If there is no string value for the index.
-     */
     public String getString(int index) throws JSONException {
-        Object object = this.get(index);
-        if (object instanceof String) {
-            return (String) object;
-        }
-        throw wrongValueFormatException(index, "String", object, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Determine if the value is <code>null</code>.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return true if the value at the index is <code>null</code>, or if there is no value.
-     */
     public boolean isNull(int index) {
-        return JSONObject.NULL.equals(this.opt(index));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Make a string from the contents of this JSONArray. The
-     * <code>separator</code> string is inserted between each element. Warning:
-     * This method assumes that the data structure is acyclical.
-     *
-     * @param separator
-     *            A string that will be inserted between the elements.
-     * @return a string.
-     * @throws JSONException
-     *             If the array contains an invalid number.
-     */
     public String join(String separator) throws JSONException {
-        int len = this.length();
-        if (len == 0) {
-            return "";
-        }
-        
-        StringBuilder sb = new StringBuilder(
-                   JSONObject.valueToString(this.myArrayList.get(0)));
-
-        for (int i = 1; i < len; i++) {
-            sb.append(separator)
-              .append(JSONObject.valueToString(this.myArrayList.get(i)));
-        }
-        return sb.toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the number of elements in the JSONArray, included nulls.
-     *
-     * @return The length (or size).
-     */
     public int length() {
-        return this.myArrayList.size();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Removes all of the elements from this JSONArray.
-     * The JSONArray will be empty after this call returns.
-     */
     public void clear() {
-        this.myArrayList.clear();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional object value associated with an index.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1. If not, null is returned.
-     * @return An object value, or null if there is no object at that index.
-     */
     public Object opt(int index) {
-        return (index < 0 || index >= this.length()) ? null : this.myArrayList
-                .get(index);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional boolean value associated with an index. It returns false
-     * if there is no value at that index, or if the value is not Boolean.TRUE
-     * or the String "true".
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The truth.
-     */
     public boolean optBoolean(int index) {
-        return this.optBoolean(index, false);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional boolean value associated with an index. It returns the
-     * defaultValue if there is no value at that index or if it is not a Boolean
-     * or the String "true" or "false" (case insensitive).
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            A boolean default.
-     * @return The truth.
-     */
     public boolean optBoolean(int index, boolean defaultValue) {
-        try {
-            return this.getBoolean(index);
-        } catch (Exception e) {
-            return defaultValue;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional Boolean object associated with an index. It returns false
-     * if there is no value at that index, or if the value is not Boolean.TRUE
-     * or the String "true".
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The truth.
-     */
     public Boolean optBooleanObject(int index) {
-        return this.optBooleanObject(index, false);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional Boolean object associated with an index. It returns the
-     * defaultValue if there is no value at that index or if it is not a Boolean
-     * or the String "true" or "false" (case insensitive).
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            A boolean default.
-     * @return The truth.
-     */
     public Boolean optBooleanObject(int index, Boolean defaultValue) {
-        try {
-            return this.getBoolean(index);
-        } catch (Exception e) {
-            return defaultValue;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional double value associated with an index. NaN is returned
-     * if there is no value for the index, or if the value is not a number and
-     * cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The value.
-     */
     public double optDouble(int index) {
-        return this.optDouble(index, Double.NaN);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional double value associated with an index. The defaultValue
-     * is returned if there is no value for the index, or if the value is not a
-     * number and cannot be converted to a number.
-     *
-     * @param index
-     *            subscript
-     * @param defaultValue
-     *            The default value.
-     * @return The value.
-     */
     public double optDouble(int index, double defaultValue) {
-        final Number val = this.optNumber(index, null);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.doubleValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional Double object associated with an index. NaN is returned
-     * if there is no value for the index, or if the value is not a number and
-     * cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The object.
-     */
     public Double optDoubleObject(int index) {
-        return this.optDoubleObject(index, Double.NaN);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional double value associated with an index. The defaultValue
-     * is returned if there is no value for the index, or if the value is not a
-     * number and cannot be converted to a number.
-     *
-     * @param index
-     *            subscript
-     * @param defaultValue
-     *            The default object.
-     * @return The object.
-     */
     public Double optDoubleObject(int index, Double defaultValue) {
-        final Number val = this.optNumber(index, null);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.doubleValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional float value associated with an index. NaN is returned
-     * if there is no value for the index, or if the value is not a number and
-     * cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The value.
-     */
     public float optFloat(int index) {
-        return this.optFloat(index, Float.NaN);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional float value associated with an index. The defaultValue
-     * is returned if there is no value for the index, or if the value is not a
-     * number and cannot be converted to a number.
-     *
-     * @param index
-     *            subscript
-     * @param defaultValue
-     *            The default value.
-     * @return The value.
-     */
     public float optFloat(int index, float defaultValue) {
-        final Number val = this.optNumber(index, null);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.floatValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional Float object associated with an index. NaN is returned
-     * if there is no value for the index, or if the value is not a number and
-     * cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The object.
-     */
     public Float optFloatObject(int index) {
-        return this.optFloatObject(index, Float.NaN);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional Float object associated with an index. The defaultValue
-     * is returned if there is no value for the index, or if the value is not a
-     * number and cannot be converted to a number.
-     *
-     * @param index
-     *            subscript
-     * @param defaultValue
-     *            The default object.
-     * @return The object.
-     */
     public Float optFloatObject(int index, Float defaultValue) {
-        final Number val = this.optNumber(index, null);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.floatValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional int value associated with an index. Zero is returned if
-     * there is no value for the index, or if the value is not a number and
-     * cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The value.
-     */
     public int optInt(int index) {
-        return this.optInt(index, 0);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional int value associated with an index. The defaultValue is
-     * returned if there is no value for the index, or if the value is not a
-     * number and cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default value.
-     * @return The value.
-     */
     public int optInt(int index, int defaultValue) {
-        final Number val = this.optNumber(index, null);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.intValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional Integer object associated with an index. Zero is returned if
-     * there is no value for the index, or if the value is not a number and
-     * cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The object.
-     */
     public Integer optIntegerObject(int index) {
-        return this.optIntegerObject(index, 0);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional Integer object associated with an index. The defaultValue is
-     * returned if there is no value for the index, or if the value is not a
-     * number and cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default object.
-     * @return The object.
-     */
     public Integer optIntegerObject(int index, Integer defaultValue) {
-        final Number val = this.optNumber(index, null);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.intValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the enum value associated with a key.
-     * 
-     * @param <E>
-     *            Enum Type
-     * @param clazz
-     *            The type of enum to retrieve.
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The enum value at the index location or null if not found
-     */
     public <E extends Enum<E>> E optEnum(Class<E> clazz, int index) {
-        return this.optEnum(clazz, index, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the enum value associated with a key.
-     * 
-     * @param <E>
-     *            Enum Type
-     * @param clazz
-     *            The type of enum to retrieve.
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default in case the value is not found
-     * @return The enum value at the index location or defaultValue if
-     *            the value is not found or cannot be assigned to clazz
-     */
     public <E extends Enum<E>> E optEnum(Class<E> clazz, int index, E defaultValue) {
-        try {
-            Object val = this.opt(index);
-            if (JSONObject.NULL.equals(val)) {
-                return defaultValue;
-            }
-            if (clazz.isAssignableFrom(val.getClass())) {
-                // we just checked it!
-                @SuppressWarnings("unchecked")
-                E myE = (E) val;
-                return myE;
-            }
-            return Enum.valueOf(clazz, val.toString());
-        } catch (IllegalArgumentException e) {
-            return defaultValue;
-        } catch (NullPointerException e) {
-            return defaultValue;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional BigInteger value associated with an index. The
-     * defaultValue is returned if there is no value for the index, or if the
-     * value is not a number and cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default value.
-     * @return The value.
-     */
     public BigInteger optBigInteger(int index, BigInteger defaultValue) {
-        return this.optBigInteger(index, defaultValue, new JSONParserConfiguration());
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional BigInteger value associated with an index. The
-     * defaultValue is returned if there is no value for the index, or if the
-     * value is not a number and cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default value.
-     * @param jsonParserConfiguration
-     *            A configuration whose {@code maxNumberLength} bounds the number of
-     *            decimal digits in the returned integer. Values exceeding this length
-     *            are treated as unconvertible and {@code defaultValue} is returned.
-     *            Pass a configuration with
-     *            {@link ParserConfiguration#UNDEFINED_MAXIMUM_NUMBER_LENGTH} to disable
-     *            this check.
-     * @return The value.
-     */
-    public BigInteger optBigInteger(int index, BigInteger defaultValue,
-            JSONParserConfiguration jsonParserConfiguration) {
-        Object val = this.opt(index);
-        return JSONObject.objectToBigInteger(val, defaultValue, jsonParserConfiguration);
+    public BigInteger optBigInteger(int index, BigInteger defaultValue, JSONParserConfiguration jsonParserConfiguration) {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional BigDecimal value associated with an index. The 
-     * defaultValue is returned if there is no value for the index, or if the 
-     * value is not a number and cannot be converted to a number. If the value
-     * is float or double, the {@link BigDecimal#BigDecimal(double)}
-     * constructor will be used. See notes on the constructor for conversion
-     * issues that may arise.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default value.
-     * @return The value.
-     */
     public BigDecimal optBigDecimal(int index, BigDecimal defaultValue) {
-        Object val = this.opt(index);
-        return JSONObject.objectToBigDecimal(val, defaultValue);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional JSONArray associated with an index. Null is returned if
-     * there is no value at that index or if the value is not a JSONArray.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return A JSONArray value.
-     */
     public JSONArray optJSONArray(int index) {
-        return this.optJSONArray(index, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional JSONArray associated with an index. The defaultValue is returned if
-     * there is no value at that index or if the value is not a JSONArray.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default.
-     * @return A JSONArray value.
-     */
     public JSONArray optJSONArray(int index, JSONArray defaultValue) {
-        Object object = this.opt(index);
-        return object instanceof JSONArray ? (JSONArray) object : defaultValue;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional JSONObject associated with an index. Null is returned if
-     * there is no value at that index or if the value is not a JSONObject.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return A JSONObject value.
-     */
     public JSONObject optJSONObject(int index) {
-        return this.optJSONObject(index, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional JSONObject associated with an index. The defaultValue is returned if
-     * there is no value at that index or if the value is not a JSONObject.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default.
-     * @return A JSONObject value.
-     */
     public JSONObject optJSONObject(int index, JSONObject defaultValue) {
-        Object object = this.opt(index);
-        return object instanceof JSONObject ? (JSONObject) object : defaultValue;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional long value associated with an index. Zero is returned if
-     * there is no value for the index, or if the value is not a number and
-     * cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The value.
-     */
     public long optLong(int index) {
-        return this.optLong(index, 0);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional long value associated with an index. The defaultValue is
-     * returned if there is no value for the index, or if the value is not a
-     * number and cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default value.
-     * @return The value.
-     */
     public long optLong(int index, long defaultValue) {
-        final Number val = this.optNumber(index, null);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.longValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional Long object associated with an index. Zero is returned if
-     * there is no value for the index, or if the value is not a number and
-     * cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return The object.
-     */
     public Long optLongObject(int index) {
-        return this.optLongObject(index, 0L);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional Long object associated with an index. The defaultValue is
-     * returned if there is no value for the index, or if the value is not a
-     * number and cannot be converted to a number.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default object.
-     * @return The object.
-     */
     public Long optLongObject(int index, Long defaultValue) {
-        final Number val = this.optNumber(index, null);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val.longValue();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional {@link Number} value associated with a key, or <code>null</code>
-     * if there is no such key or if the value is not a number. If the value is a string,
-     * an attempt will be made to evaluate it as a number ({@link BigDecimal}). This method
-     * would be used in cases where type coercion of the number value is unwanted.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return An object which is the value.
-     */
     public Number optNumber(int index) {
-        return this.optNumber(index, null);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get an optional {@link Number} value associated with a key, or the default if there
-     * is no such key or if the value is not a number. If the value is a string,
-     * an attempt will be made to evaluate it as a number ({@link BigDecimal}). This method
-     * would be used in cases where type coercion of the number value is unwanted.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default.
-     * @return An object which is the value.
-     */
     public Number optNumber(int index, Number defaultValue) {
-        Object val = this.opt(index);
-        if (JSONObject.NULL.equals(val)) {
-            return defaultValue;
-        }
-        if (val instanceof Number){
-            return (Number) val;
-        }
-        
-        if (val instanceof String) {
-            try {
-                return JSONObject.stringToNumber((String) val);
-            } catch (Exception e) {
-                return defaultValue;
-            }
-        }
-        return defaultValue;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional string value associated with an index. It returns an
-     * empty string if there is no value at that index. If the value is not a
-     * string and is not null, then it is converted to a string.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @return A String value.
-     */
     public String optString(int index) {
-        return this.optString(index, "");
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Get the optional string associated with an index. The defaultValue is
-     * returned if the key is not found.
-     *
-     * @param index
-     *            The index must be between 0 and length() - 1.
-     * @param defaultValue
-     *            The default value.
-     * @return A String value.
-     */
     public String optString(int index, String defaultValue) {
-        Object object = this.opt(index);
-        return JSONObject.NULL.equals(object) ? defaultValue : object
-                .toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Append a boolean value. This increases the array's length by one.
-     *
-     * @param value
-     *            A boolean value.
-     * @return this.
-     */
     public JSONArray put(boolean value) {
-        return this.put(value ? Boolean.TRUE : Boolean.FALSE);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a value in the JSONArray, where the value will be a JSONArray which
-     * is produced from a Collection.
-     *
-     * @param value
-     *            A Collection value.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number.
-     */
     public JSONArray put(Collection<?> value) {
-        return this.put(new JSONArray(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Append a double value. This increases the array's length by one.
-     *
-     * @param value
-     *            A double value.
-     * @return this.
-     * @throws JSONException
-     *             if the value is not finite.
-     */
     public JSONArray put(double value) throws JSONException {
-        return this.put(Double.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-    
-    /**
-     * Append a float value. This increases the array's length by one.
-     *
-     * @param value
-     *            A float value.
-     * @return this.
-     * @throws JSONException
-     *             if the value is not finite.
-     */
+
     public JSONArray put(float value) throws JSONException {
-        return this.put(Float.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Append an int value. This increases the array's length by one.
-     *
-     * @param value
-     *            An int value.
-     * @return this.
-     */
     public JSONArray put(int value) {
-        return this.put(Integer.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Append an long value. This increases the array's length by one.
-     *
-     * @param value
-     *            A long value.
-     * @return this.
-     */
     public JSONArray put(long value) {
-        return this.put(Long.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a value in the JSONArray, where the value will be a JSONObject which
-     * is produced from a Map.
-     *
-     * @param value
-     *            A Map value.
-     * @return this.
-     * @throws JSONException
-     *            If a value in the map is non-finite number.
-     * @throws NullPointerException
-     *            If a key in the map is <code>null</code>
-     */
     public JSONArray put(Map<?, ?> value) {
-        return this.put(new JSONObject(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Append an object value. This increases the array's length by one.
-     *
-     * @param value
-     *            An object value. The value should be a Boolean, Double,
-     *            Integer, JSONArray, JSONObject, Long, or String, or the
-     *            JSONObject.NULL object.
-     * @return this.
-     * @throws JSONException
-     *            If the value is non-finite number.
-     */
     public JSONArray put(Object value) {
-        JSONObject.testValidity(value);
-        this.myArrayList.add(value);
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put or replace a boolean value in the JSONArray. If the index is greater
-     * than the length of the JSONArray, then null elements will be added as
-     * necessary to pad it out.
-     *
-     * @param index
-     *            The subscript.
-     * @param value
-     *            A boolean value.
-     * @return this.
-     * @throws JSONException
-     *             If the index is negative.
-     */
     public JSONArray put(int index, boolean value) throws JSONException {
-        return this.put(index, value ? Boolean.TRUE : Boolean.FALSE);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a value in the JSONArray, where the value will be a JSONArray which
-     * is produced from a Collection.
-     *
-     * @param index
-     *            The subscript.
-     * @param value
-     *            A Collection value.
-     * @return this.
-     * @throws JSONException
-     *             If the index is negative or if the value is non-finite.
-     */
     public JSONArray put(int index, Collection<?> value) throws JSONException {
-        return this.put(index, new JSONArray(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put or replace a double value. If the index is greater than the length of
-     * the JSONArray, then null elements will be added as necessary to pad it
-     * out.
-     *
-     * @param index
-     *            The subscript.
-     * @param value
-     *            A double value.
-     * @return this.
-     * @throws JSONException
-     *             If the index is negative or if the value is non-finite.
-     */
     public JSONArray put(int index, double value) throws JSONException {
-        return this.put(index, Double.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put or replace a float value. If the index is greater than the length of
-     * the JSONArray, then null elements will be added as necessary to pad it
-     * out.
-     *
-     * @param index
-     *            The subscript.
-     * @param value
-     *            A float value.
-     * @return this.
-     * @throws JSONException
-     *             If the index is negative or if the value is non-finite.
-     */
     public JSONArray put(int index, float value) throws JSONException {
-        return this.put(index, Float.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put or replace an int value. If the index is greater than the length of
-     * the JSONArray, then null elements will be added as necessary to pad it
-     * out.
-     *
-     * @param index
-     *            The subscript.
-     * @param value
-     *            An int value.
-     * @return this.
-     * @throws JSONException
-     *             If the index is negative.
-     */
     public JSONArray put(int index, int value) throws JSONException {
-        return this.put(index, Integer.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put or replace a long value. If the index is greater than the length of
-     * the JSONArray, then null elements will be added as necessary to pad it
-     * out.
-     *
-     * @param index
-     *            The subscript.
-     * @param value
-     *            A long value.
-     * @return this.
-     * @throws JSONException
-     *             If the index is negative.
-     */
     public JSONArray put(int index, long value) throws JSONException {
-        return this.put(index, Long.valueOf(value));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a value in the JSONArray, where the value will be a JSONObject that
-     * is produced from a Map.
-     *
-     * @param index
-     *            The subscript.
-     * @param value
-     *            The Map value.
-     * @return
-     *             reference to self
-     * @throws JSONException
-     *             If the index is negative or if the value is an invalid
-     *             number.
-     * @throws NullPointerException
-     *             If a key in the map is <code>null</code>
-     */
     public JSONArray put(int index, Map<?, ?> value) throws JSONException {
-        this.put(index, new JSONObject(value, new JSONParserConfiguration()));
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a value in the JSONArray, where the value will be a JSONObject that
-     * is produced from a Map.
-     *
-     * @param index
-     *          The subscript
-     * @param value
-     *          The Map value.
-     * @param jsonParserConfiguration
-     *          Configuration object for the JSON parser
-     * @return reference to self
-     * @throws JSONException
-     *          If the index is negative or if the value is an invalid
-     *          number.
-     */
     public JSONArray put(int index, Map<?, ?> value, JSONParserConfiguration jsonParserConfiguration) throws JSONException {
-        this.put(index, new JSONObject(value, jsonParserConfiguration));
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put or replace an object value in the JSONArray. If the index is greater
-     * than the length of the JSONArray, then null elements will be added as
-     * necessary to pad it out.
-     *
-     * @param index
-     *            The subscript.
-     * @param value
-     *            The value to put into the array. The value should be a
-     *            Boolean, Double, Integer, JSONArray, JSONObject, Long, or
-     *            String, or the JSONObject.NULL object.
-     * @return this.
-     * @throws JSONException
-     *             If the index is negative or if the value is an invalid
-     *             number.
-     */
     public JSONArray put(int index, Object value) throws JSONException {
-        if (index < 0) {
-            throw new JSONException("JSONArray[" + index + "] not found.");
-        }
-        if (index < this.length()) {
-            JSONObject.testValidity(value);
-            this.myArrayList.set(index, value);
-            return this;
-        }
-        if(index == this.length()){
-            // simple append
-            return this.put(value);
-        }
-        // if we are inserting past the length, we want to grow the array all at once
-        // instead of incrementally.
-        this.myArrayList.ensureCapacity(index + 1);
-        while (index != this.length()) {
-            // we don't need to test validity of NULL objects
-            this.myArrayList.add(JSONObject.NULL);
-        }
-        return this.put(value);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a collection's elements in to the JSONArray.
-     *
-     * @param collection
-     *            A Collection.
-     * @return this. 
-     */
     public JSONArray putAll(Collection<?> collection) {
-        this.addAll(collection, false);
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-    
-    /**
-     * Put an Iterable's elements in to the JSONArray.
-     *
-     * @param iter
-     *            An Iterable.
-     * @return this. 
-     */
+
     public JSONArray putAll(Iterable<?> iter) {
-        this.addAll(iter, false);
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put a JSONArray's elements in to the JSONArray.
-     *
-     * @param array
-     *            A JSONArray.
-     * @return this. 
-     */
     public JSONArray putAll(JSONArray array) {
-        // directly copy the elements from the source array to this one
-        // as all wrapping should have been done already in the source.
-        this.myArrayList.addAll(array.myArrayList);
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Put an array's elements in to the JSONArray.
-     *
-     * @param array
-     *            Array. If the parameter passed is null, or not an array or Iterable, an
-     *            exception will be thrown.
-     * @return this. 
-     *
-     * @throws JSONException
-     *            If not an array, JSONArray, Iterable or if an value is non-finite number.
-     * @throws NullPointerException
-     *            Thrown if the array parameter is null.
-     */
     public JSONArray putAll(Object array) throws JSONException {
-        this.addAll(array, false);
-        return this;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-    
-    /**
-     * Creates a JSONPointer using an initialization string and tries to 
-     * match it to an item within this JSONArray. For example, given a
-     * JSONArray initialized with this document:
-     * <pre>
-     * [
-     *     {"b":"c"}
-     * ]
-     * </pre>
-     * and this JSONPointer string: 
-     * <pre>
-     * "/0/b"
-     * </pre>
-     * Then this method will return the String "c"
-     * A JSONPointerException may be thrown from code called by this method.
-     *
-     * @param jsonPointer string that can be used to create a JSONPointer
-     * @return the item matched by the JSONPointer, otherwise null
-     */
+
     public Object query(String jsonPointer) {
-        return query(new JSONPointer(jsonPointer));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-    
-    /**
-     * Uses a user initialized JSONPointer  and tries to 
-     * match it to an item within this JSONArray. For example, given a
-     * JSONArray initialized with this document:
-     * <pre>
-     * [
-     *     {"b":"c"}
-     * ]
-     * </pre>
-     * and this JSONPointer: 
-     * <pre>
-     * "/0/b"
-     * </pre>
-     * Then this method will return the String "c"
-     * A JSONPointerException may be thrown from code called by this method.
-     *
-     * @param jsonPointer string that can be used to create a JSONPointer
-     * @return the item matched by the JSONPointer, otherwise null
-     */
+
     public Object query(JSONPointer jsonPointer) {
-        return jsonPointer.queryFrom(this);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-    
-    /**
-     * Queries and returns a value from this object using {@code jsonPointer}, or
-     * returns null if the query fails due to a missing key.
-     * 
-     * @param jsonPointer the string representation of the JSON pointer
-     * @return the queried value or {@code null}
-     * @throws IllegalArgumentException if {@code jsonPointer} has invalid syntax
-     */
+
     public Object optQuery(String jsonPointer) {
-    	return optQuery(new JSONPointer(jsonPointer));
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-    
-    /**
-     * Queries and returns a value from this object using {@code jsonPointer}, or
-     * returns null if the query fails due to a missing key.
-     * 
-     * @param jsonPointer The JSON pointer
-     * @return the queried value or {@code null}
-     * @throws IllegalArgumentException if {@code jsonPointer} has invalid syntax
-     */
+
     public Object optQuery(JSONPointer jsonPointer) {
-        try {
-            return jsonPointer.queryFrom(this);
-        } catch (JSONPointerException e) {
-            return null;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Remove an index and close the hole.
-     *
-     * @param index
-     *            The index of the element to be removed.
-     * @return The value that was associated with the index, or null if there
-     *         was no value.
-     */
     public Object remove(int index) {
-        return index >= 0 && index < this.length()
-            ? this.myArrayList.remove(index)
-            : null;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Determine if two JSONArrays are similar.
-     * They must contain similar sequences.
-     *
-     * @param other The other JSONArray
-     * @return true if they are equal
-     */
     public boolean similar(Object other) {
-        if (!(other instanceof JSONArray)) {
-            return false;
-        }
-        int len = this.length();
-        if (len != ((JSONArray)other).length()) {
-            return false;
-        }
-        for (int i = 0; i < len; i += 1) {
-            Object valueThis = this.myArrayList.get(i);
-            Object valueOther = ((JSONArray)other).myArrayList.get(i);
-            if(valueThis == valueOther) {
-            	continue;
-            }
-            if(valueThis == null) {
-            	return false;
-            }
-            if (!isSimilar(valueThis, valueOther)) {
-                return false;
-            }
-        }
-        return true;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -1702,15 +639,15 @@ public class JSONArray implements Iterable<Object> {
      */
     private boolean isSimilar(Object valueThis, Object valueOther) {
         if (valueThis instanceof JSONObject) {
-            if (!((JSONObject)valueThis).similar(valueOther)) {
+            if (!((JSONObject) valueThis).similar(valueOther)) {
                 return false;
             }
         } else if (valueThis instanceof JSONArray) {
-            if (!((JSONArray)valueThis).similar(valueOther)) {
+            if (!((JSONArray) valueThis).similar(valueOther)) {
                 return false;
             }
         } else if (valueThis instanceof Number && valueOther instanceof Number) {
-            if (!JSONObject.isNumberSimilar((Number)valueThis, (Number)valueOther)) {
+            if (!JSONObject.isNumberSimilar((Number) valueThis, (Number) valueOther)) {
                 return false;
             }
         } else if (valueThis instanceof JSONString && valueOther instanceof JSONString) {
@@ -1723,162 +660,27 @@ public class JSONArray implements Iterable<Object> {
         return true;
     }
 
-    /**
-     * Produce a JSONObject by combining a JSONArray of names with the values of
-     * this JSONArray.
-     *
-     * @param names
-     *            A JSONArray containing a list of key strings. These will be
-     *            paired with the values.
-     * @return A JSONObject, or null if there are no names or if this JSONArray
-     *         has no values.
-     * @throws JSONException
-     *             If any of the names are null.
-     */
     public JSONObject toJSONObject(JSONArray names) throws JSONException {
-        if (names == null || names.isEmpty() || this.isEmpty()) {
-            return null;
-        }
-        JSONObject jo = new JSONObject(names.length());
-        for (int i = 0; i < names.length(); i += 1) {
-            jo.put(names.getString(i), this.opt(i));
-        }
-        return jo;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Make a JSON text of this JSONArray. For compactness, no unnecessary
-     * whitespace is added. If it is not possible to produce a syntactically
-     * correct JSON text then null will be returned instead. This could occur if
-     * the array contains an invalid number.
-     * <p><b>
-     * Warning: This method assumes that the data structure is acyclical.
-     * </b>
-     *
-     * @return a printable, displayable, transmittable representation of the
-     *         array.
-     */
     @Override
     public String toString() {
-        try {
-            return this.toString(0);
-        } catch (Exception e) {
-            return null;
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Make a pretty-printed JSON text of this JSONArray.
-     * 
-     * <p>If <pre> {@code indentFactor > 0}</pre> and the {@link JSONArray} has only
-     * one element, then the array will be output on a single line:
-     * <pre>{@code [1]}</pre>
-     * 
-     * <p>If an array has 2 or more elements, then it will be output across
-     * multiple lines: <pre>{@code
-     * [
-     * 1,
-     * "value 2",
-     * 3
-     * ]
-     * }</pre>
-     * <p><b>
-     * Warning: This method assumes that the data structure is acyclical.
-     * </b>
-     * 
-     * @param indentFactor
-     *            The number of spaces to add to each level of indentation.
-     * @return a printable, displayable, transmittable representation of the
-     *         object, beginning with <code>[</code>&nbsp;<small>(left
-     *         bracket)</small> and ending with <code>]</code>
-     *         &nbsp;<small>(right bracket)</small>.
-     * @throws JSONException if a called function fails
-     */
     @SuppressWarnings("resource")
     public String toString(int indentFactor) throws JSONException {
-        // each value requires a comma, so multiply the count by 2
-        // We don't want to oversize the initial capacity
-        int initialSize = myArrayList.size() * 2;
-        Writer sw = new StringBuilderWriter(Math.max(initialSize, 16));
-        return this.write(sw, indentFactor, 0).toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Write the contents of the JSONArray as JSON text to a writer. For
-     * compactness, no whitespace is added.
-     * <p><b>
-     * Warning: This method assumes that the data structure is acyclical.
-     *</b>
-     * @param writer the writer object
-     * @return The writer.
-     * @throws JSONException if a called function fails
-     */
     public Writer write(Writer writer) throws JSONException {
-        return this.write(writer, 0, 0);
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Write the contents of the JSONArray as JSON text to a writer.
-     * 
-     * <p>If <pre>{@code indentFactor > 0}</pre> and the {@link JSONArray} has only
-     * one element, then the array will be output on a single line:
-     * <pre>{@code [1]}</pre>
-     * 
-     * <p>If an array has 2 or more elements, then it will be output across
-     * multiple lines: <pre>{@code
-     * [
-     * 1,
-     * "value 2",
-     * 3
-     * ]
-     * }</pre>
-     * <p><b>
-     * Warning: This method assumes that the data structure is acyclical.
-     * </b>
-     *
-     * @param writer
-     *            Writes the serialized JSON
-     * @param indentFactor
-     *            The number of spaces to add to each level of indentation.
-     * @param indent
-     *            The indentation of the top level.
-     * @return The writer.
-     * @throws JSONException if a called function fails or unable to write
-     */
     @SuppressWarnings("resource")
-    public Writer write(Writer writer, int indentFactor, int indent)
-            throws JSONException {
-        try {
-            boolean needsComma = false;
-            int length = this.length();
-            writer.write('[');
-
-            if (length == 1) {
-                writeArrayAttempt(writer, indentFactor, indent, 0);
-            } else if (length != 0) {
-                final int newIndent = indent + indentFactor;
-
-                for (int i = 0; i < length; i += 1) {
-                    if (needsComma) {
-                        writer.write(',');
-                    }
-                    if (indentFactor > 0) {
-                        writer.write('\n');
-                    }
-                    JSONObject.indent(writer, newIndent);
-                    writeArrayAttempt(writer, indentFactor, newIndent, i);
-                    needsComma = true;
-                }
-                if (indentFactor > 0) {
-                    writer.write('\n');
-                }
-                JSONObject.indent(writer, indent);
-            }
-            writer.write(']');
-            return writer;
-        } catch (IOException e) {
-            throw new JSONException(e);
-        }
+    public Writer write(Writer writer, int indentFactor, int indent) throws JSONException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -1894,45 +696,18 @@ public class JSONArray implements Iterable<Object> {
      */
     private void writeArrayAttempt(Writer writer, int indentFactor, int indent, int i) {
         try {
-            JSONObject.writeValue(writer, this.myArrayList.get(i),
-                    indentFactor, indent);
+            JSONObject.writeValue(writer, this.myArrayList.get(i), indentFactor, indent);
         } catch (Exception e) {
             throw new JSONException("Unable to write JSONArray value at index: " + i, e);
         }
     }
 
-    /**
-     * Returns a java.util.List containing all of the elements in this array.
-     * If an element in the array is a JSONArray or JSONObject it will also
-     * be converted to a List and a Map respectively.
-     * <p>
-     * Warning: This method assumes that the data structure is acyclical.
-     *
-     * @return a java.util.List containing the elements of this array
-     */
     public List<Object> toList() {
-        List<Object> results = new ArrayList<Object>(this.myArrayList.size());
-        for (Object element : this.myArrayList) {
-            if (element == null || JSONObject.NULL.equals(element)) {
-                results.add(null);
-            } else if (element instanceof JSONArray) {
-                results.add(((JSONArray) element).toList());
-            } else if (element instanceof JSONObject) {
-                results.add(((JSONObject) element).toMap());
-            } else {
-                results.add(element);
-            }
-        }
-        return results;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
-    /**
-     * Check if JSONArray is empty.
-     *
-     * @return true if JSONArray is empty, otherwise false.
-     */
     public boolean isEmpty() {
-        return this.myArrayList.isEmpty();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -1949,11 +724,11 @@ public class JSONArray implements Iterable<Object> {
     private void addAll(Collection<?> collection, boolean wrap, int recursionDepth, JSONParserConfiguration jsonParserConfiguration) {
         this.myArrayList.ensureCapacity(this.myArrayList.size() + collection.size());
         if (wrap) {
-            for (Object o: collection){
+            for (Object o : collection) {
                 this.put(JSONObject.wrap(o, recursionDepth + 1, jsonParserConfiguration));
             }
         } else {
-            for (Object o: collection){
+            for (Object o : collection) {
                 this.put(o);
             }
         }
@@ -1970,11 +745,11 @@ public class JSONArray implements Iterable<Object> {
      */
     private void addAll(Iterable<?> iter, boolean wrap) {
         if (wrap) {
-            for (Object o: iter){
+            for (Object o : iter) {
                 this.put(JSONObject.wrap(o));
             }
         } else {
-            for (Object o: iter){
+            for (Object o : iter) {
                 this.put(o);
             }
         }
@@ -1994,7 +769,7 @@ public class JSONArray implements Iterable<Object> {
      *          If not an array or if an array value is non-finite number.
      */
     private void addAll(Object array, boolean wrap) throws JSONException {
-      this.addAll(array, wrap, 0);
+        this.addAll(array, wrap, 0);
     }
 
     /**
@@ -2013,24 +788,25 @@ public class JSONArray implements Iterable<Object> {
     private void addAll(Object array, boolean wrap, int recursionDepth) {
         addAll(array, wrap, recursionDepth, new JSONParserConfiguration());
     }
+
     /**
-     * Add an array's elements to the JSONArray.
-     *`
-     * @param array
-     *            Array. If the parameter passed is null, or not an array,
-     *            JSONArray, Collection, or Iterable, an exception will be
-     *            thrown.
-     * @param wrap
-     *            {@code true} to call {@link JSONObject#wrap(Object)} for each item,
-     *            {@code false} to add the items directly
-     * @param recursionDepth
-     *            Variable for tracking the count of nested object creations.
-     * @param jsonParserConfiguration
-     *            Variable to pass parser custom configuration for json parsing.
-     * @throws JSONException
-     *            If not an array or if an array value is non-finite number.
-     * @throws NullPointerException
-     *            Thrown if the array parameter is null.
+     *  Add an array's elements to the JSONArray.
+     * `
+     *  @param array
+     *             Array. If the parameter passed is null, or not an array,
+     *             JSONArray, Collection, or Iterable, an exception will be
+     *             thrown.
+     *  @param wrap
+     *             {@code true} to call {@link JSONObject#wrap(Object)} for each item,
+     *             {@code false} to add the items directly
+     *  @param recursionDepth
+     *             Variable for tracking the count of nested object creations.
+     *  @param jsonParserConfiguration
+     *             Variable to pass parser custom configuration for json parsing.
+     *  @throws JSONException
+     *             If not an array or if an array value is non-finite number.
+     *  @throws NullPointerException
+     *             Thrown if the array parameter is null.
      */
     private void addAll(Object array, boolean wrap, int recursionDepth, JSONParserConfiguration jsonParserConfiguration) throws JSONException {
         if (array.getClass().isArray()) {
@@ -2049,17 +825,16 @@ public class JSONArray implements Iterable<Object> {
             // use the built in array list `addAll` as all object
             // wrapping should have been completed in the original
             // JSONArray
-            this.myArrayList.addAll(((JSONArray)array).myArrayList);
+            this.myArrayList.addAll(((JSONArray) array).myArrayList);
         } else if (array instanceof Collection) {
-            this.addAll((Collection<?>)array, wrap, recursionDepth, jsonParserConfiguration);
+            this.addAll((Collection<?>) array, wrap, recursionDepth, jsonParserConfiguration);
         } else if (array instanceof Iterable) {
-            this.addAll((Iterable<?>)array, wrap);
+            this.addAll((Iterable<?>) array, wrap);
         } else {
-            throw new JSONException(
-                    "JSONArray initial value should be a string or collection or array.");
+            throw new JSONException("JSONArray initial value should be a string or collection or array.");
         }
     }
-    
+
     /**
      * Create a new JSONException in a common format for incorrect conversions.
      * @param idx index of the item
@@ -2067,25 +842,14 @@ public class JSONArray implements Iterable<Object> {
      * @param cause optional cause of the coercion failure
      * @return JSONException that can be thrown.
      */
-    private static JSONException wrongValueFormatException(
-            int idx,
-            String valueType,
-            Object value,
-            Throwable cause) {
-        if(value == null) {
-            return new JSONException(
-                    "JSONArray[" + idx + "] is not a " + valueType + " (null)."
-                    , cause);
+    private static JSONException wrongValueFormatException(int idx, String valueType, Object value, Throwable cause) {
+        if (value == null) {
+            return new JSONException("JSONArray[" + idx + "] is not a " + valueType + " (null).", cause);
         }
         // don't try to toString collections or known object types that could be large.
-        if(value instanceof Map || value instanceof Iterable || value instanceof JSONObject) {
-            return new JSONException(
-                    "JSONArray[" + idx + "] is not a " + valueType + " (" + value.getClass() + ")."
-                    , cause);
+        if (value instanceof Map || value instanceof Iterable || value instanceof JSONObject) {
+            return new JSONException("JSONArray[" + idx + "] is not a " + valueType + " (" + value.getClass() + ").", cause);
         }
-        return new JSONException(
-                "JSONArray[" + idx + "] is not a " + valueType + " (" + value.getClass() + " : " + value + ")."
-                , cause);
+        return new JSONException("JSONArray[" + idx + "] is not a " + valueType + " (" + value.getClass() + " : " + value + ").", cause);
     }
-
 }

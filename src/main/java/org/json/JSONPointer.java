@@ -1,7 +1,6 @@
 package org.json;
 
 import static java.lang.String.format;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -12,22 +11,21 @@ import java.util.List;
 /*
 Public Domain.
 */
-
 /**
  * A JSON Pointer is a simple query language defined for JSON documents by
  * <a href="https://tools.ietf.org/html/rfc6901">RFC 6901</a>.
- * 
+ *
  * In a nutshell, JSONPointer allows the user to navigate into a JSON document
  * using strings, and retrieve targeted objects, like a simple form of XPATH.
  * Path segments are separated by the '/' char, which signifies the root of
- * the document when it appears as the first char of the string. Array 
+ * the document when it appears as the first char of the string. Array
  * elements are navigated using ordinals, counting from 0. JSONPointer strings
  * may be extended to any arbitrary number of segments. If the navigation
  * is successful, the matched item is returned. A matched item may be a
- * JSONObject, a JSONArray, or a JSON value. If the JSONPointer string building 
+ * JSONObject, a JSONArray, or a JSON value. If the JSONPointer string building
  * fails, an appropriate exception is thrown. If the navigation fails to find
- * a match, a JSONPointerException is thrown. 
- * 
+ * a match, a JSONPointerException is thrown.
+ *
  * @author JSON.org
  * @version 2016-05-14
  */
@@ -51,65 +49,21 @@ public class JSONPointer {
         // Segments for the eventual JSONPointer string
         private final List<String> refTokens = new ArrayList<String>();
 
-        /**
-         * Creates a {@code JSONPointer} instance using the tokens previously set using the
-         * {@link #append(String)} method calls.
-         * @return a JSONPointer object
-         */
         public JSONPointer build() {
-            return new JSONPointer(this.refTokens);
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
-        /**
-         * Adds an arbitrary token to the list of reference tokens. It can be any non-null value.
-         * 
-         * Unlike in the case of JSON string or URI fragment representation of JSON pointers, the
-         * argument of this method MUST NOT be escaped. If you want to query the property called
-         * {@code "a~b"} then you should simply pass the {@code "a~b"} string as-is, there is no
-         * need to escape it as {@code "a~0b"}.
-         * 
-         * @param token the new token to be appended to the list
-         * @return {@code this}
-         * @throws NullPointerException if {@code token} is null
-         */
         public Builder append(String token) {
-            if (token == null) {
-                throw new NullPointerException("token cannot be null");
-            }
-            this.refTokens.add(token);
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
 
-        /**
-         * Adds an integer to the reference token list. Although not necessarily, mostly this token will
-         * denote an array index. 
-         * 
-         * @param arrayIndex the array index to be added to the token list
-         * @return {@code this}
-         */
         public Builder append(int arrayIndex) {
-            this.refTokens.add(String.valueOf(arrayIndex));
-            return this;
+            throw new UnsupportedOperationException("STUB: not implemented");
         }
     }
 
-    /**
-     * Static factory method for {@link Builder}. Example usage:
-     * 
-     * <pre><code>
-     * JSONPointer pointer = JSONPointer.builder()
-     *       .append("obj")
-     *       .append("other~key").append("another/key")
-     *       .append("\"")
-     *       .append(0)
-     *       .build();
-     * </code></pre>
-     * 
-     *  @return a builder instance which can be used to construct a {@code JSONPointer} instance by chained
-     *  {@link Builder#append(String)} calls.
-     */
     public static Builder builder() {
-        return new Builder();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     // Segments for the JSONPointer string
@@ -119,7 +73,7 @@ public class JSONPointer {
      * Pre-parses and initializes a new {@code JSONPointer} instance. If you want to
      * evaluate the same JSON Pointer on different JSON documents then it is recommended
      * to keep the {@code JSONPointer} instances due to performance considerations.
-     * 
+     *
      * @param pointer the JSON String or URI Fragment representation of the JSON pointer.
      * @throws IllegalArgumentException if {@code pointer} is not a valid JSON pointer
      */
@@ -150,7 +104,7 @@ public class JSONPointer {
         do {
             prevSlashIdx = slashIdx + 1;
             slashIdx = refs.indexOf('/', prevSlashIdx);
-            if(prevSlashIdx == slashIdx || prevSlashIdx == refs.length()) {
+            if (prevSlashIdx == slashIdx || prevSlashIdx == refs.length()) {
                 // found 2 slashes in a row ( obj//next )
                 // or single slash at the end of a string ( obj/test/ )
                 this.refTokens.add("");
@@ -186,33 +140,8 @@ public class JSONPointer {
         return token.replace("~1", "/").replace("~0", "~");
     }
 
-    /**
-     * Evaluates this JSON Pointer on the given {@code document}. The {@code document}
-     * is usually a {@link JSONObject} or a {@link JSONArray} instance, but the empty
-     * JSON Pointer ({@code ""}) can be evaluated on any JSON values and in such case the
-     * returned value will be {@code document} itself. 
-     * 
-     * @param document the JSON document which should be the subject of querying.
-     * @return the result of the evaluation
-     * @throws JSONPointerException if an error occurs during evaluation
-     */
     public Object queryFrom(Object document) throws JSONPointerException {
-        if (this.refTokens.isEmpty()) {
-            return document;
-        }
-        Object current = document;
-        for (String token : this.refTokens) {
-            if (current instanceof JSONObject) {
-                current = ((JSONObject) current).opt(unescape(token));
-            } else if (current instanceof JSONArray) {
-                current = readByIndexToken(current, token);
-            } else {
-                throw new JSONPointerException(format(
-                        "value [%s] is not an array or object therefore its key %s cannot be resolved", current,
-                        token));
-            }
-        }
-        return current;
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
@@ -227,61 +156,37 @@ public class JSONPointer {
             int index = Integer.parseInt(indexToken);
             JSONArray currentArr = (JSONArray) current;
             if (index >= currentArr.length()) {
-                throw new JSONPointerException(format("index %s is out of bounds - the array has %d elements", indexToken,
-                        Integer.valueOf(currentArr.length())));
+                throw new JSONPointerException(format("index %s is out of bounds - the array has %d elements", indexToken, Integer.valueOf(currentArr.length())));
             }
             try {
-				return currentArr.get(index);
-			} catch (JSONException e) {
-				throw new JSONPointerException("Error reading value at index position " + index, e);
-			}
+                return currentArr.get(index);
+            } catch (JSONException e) {
+                throw new JSONPointerException("Error reading value at index position " + index, e);
+            }
         } catch (NumberFormatException e) {
             throw new JSONPointerException(format("%s is not an array index", indexToken), e);
         }
     }
 
-    /**
-     * Returns a string representing the JSONPointer path value using string
-     * representation
-     */
     @Override
     public String toString() {
-        StringBuilder rval = new StringBuilder();
-        for (String token: this.refTokens) {
-            rval.append('/').append(escape(token));
-        }
-        return rval.toString();
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
 
     /**
      * Escapes path segment values to an unambiguous form.
-     * The escape char to be inserted is '~'. The chars to be escaped 
+     * The escape char to be inserted is '~'. The chars to be escaped
      * are ~, which maps to ~0, and /, which maps to ~1.
      * @param token the JSONPointer segment value to be escaped
      * @return the escaped value for the token
-     * 
+     *
      * @see <a href="https://tools.ietf.org/html/rfc6901#section-3">rfc6901 section 3</a>
      */
     private static String escape(String token) {
-        return token.replace("~", "~0")
-                .replace("/", "~1");
+        return token.replace("~", "~0").replace("/", "~1");
     }
 
-    /**
-     * Returns a string representing the JSONPointer path value using URI
-     * fragment identifier representation
-     * @return a uri fragment string
-     */
     public String toURIFragment() {
-        try {
-            StringBuilder rval = new StringBuilder("#");
-            for (String token : this.refTokens) {
-                rval.append('/').append(URLEncoder.encode(token, ENCODING));
-            }
-            return rval.toString();
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-    
 }
